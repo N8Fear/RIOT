@@ -36,7 +36,7 @@ typedef struct {
 /**
  * @brief Allocate memory to store the callback functions.
  */
-static uart_conf_t config[UART_NUMOF];
+//static uart_conf_t config[UART_NUMOF];
 
 
 
