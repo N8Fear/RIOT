@@ -352,6 +352,7 @@ int gpio_read(gpio_t dev)
 //        default:
 //            return -1;
 //    }
+    return 6;
 }
 
 int gpio_set(gpio_t dev)
@@ -425,6 +426,7 @@ int gpio_set(gpio_t dev)
 //        default:
 //            return -1;
 //    }
+    return 6;
 }
 
 int gpio_clear(gpio_t dev)
@@ -498,6 +500,7 @@ int gpio_clear(gpio_t dev)
 //        default:
 //            return -1;
 //    }
+    return 6;
 }
 
 int gpio_toggle(gpio_t dev)
@@ -507,6 +510,7 @@ int gpio_toggle(gpio_t dev)
 //    } else {
 //        return gpio_set(dev);
 //    }
+    return 6;
 }
 
 int gpio_write(gpio_t dev, int value)
@@ -516,4 +520,5 @@ int gpio_write(gpio_t dev, int value)
 //    } else {
 //        return gpio_clear(dev);
 //    }
+    return 6;
 }
