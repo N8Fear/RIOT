@@ -261,6 +261,7 @@ unsigned int timer_read(tim_t dev)
 //        default:
 //            return 0;
 //    }
+    return 6;
 }
 
 /*

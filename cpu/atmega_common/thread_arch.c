@@ -62,7 +62,7 @@ static void enter_thread_mode(void);
  */
 char *thread_arch_stack_init(void  (*task_func)(void), void *stack_start, int stack_size)
 {
-	char * x;
+	char * x = (char *) &thread_arch_stack_init;
 	return x;
 }
 
@@ -73,7 +73,7 @@ void thread_arch_stack_print(void)
 
 void thread_arch_start_threading(void)
 {
-
+	;
 }
 
 /**
