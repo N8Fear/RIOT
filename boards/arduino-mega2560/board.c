@@ -23,11 +23,27 @@
 #include "board.h"
 #include "cpu.h"
 
+/* defines from extern project */
+#include <avr/io.h>
+#include <avr/sfr_defs.h>
+#include <util/delay.h>
+
+#define USART_BAUDRATE 9600
+#define BAUD_PRESCALE ((F_CPU / (USART_BAUDRATE * 16UL)) - 1)
+
+/* defines: end */
 
 void led_init(void);
 
+/* prototypes from extern project */
+static int uart_putchar(char c, FILE *stream);
+static FILE mystdout = FDEV_SETUP_STREAM(uart_putchar, NULL, _FDEV_SETUP_WRITE);
+void init_uart(void);
 
-void board_init(void)
+/*prototypes: end */
+
+//void board_init(void)
+void main (void)
 {
     /* initialize core clocks via CMSIS function provided by Atmel */
  //   SystemInit();
@@ -38,6 +54,36 @@ void board_init(void)
     /* initialize the boards LEDs */
    // led_init();
 
+	/* hardcoded UART stuff from extern project */
+	init_uart();
+	stdout=&mystdout;
+	while (1) {
+		//printf("OmmO isst Gurken!\n");
+		puts("ATmega 2560 initialized!\n");
+		_delay_ms(500);
+	}
+}
+
+//int main (void) {}
+
+
+void init_uart(void)
+{
+	UCSR0B |= (1 << RXEN0) | (1 << TXEN0); // turn on rx and tx
+	UCSR0C |= (1 << UCSZ00) | (1 << UCSZ01); // 8 Bit characters
+
+	UBRR0H = (BAUD_PRESCALE >> 8);
+	UBRR0L = BAUD_PRESCALE;
+}
+
+
+static int uart_putchar(char c, FILE *stream)
+{
+	if (c == '\n')
+			uart_putchar('\r', stream);
+	loop_until_bit_is_set(UCSR0A, UDRE0);
+	UDR0 = c;
+	return 0;
 }
 
 
