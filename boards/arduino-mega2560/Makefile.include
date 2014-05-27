@@ -37,7 +37,7 @@ export LINKFLAGS += -g3 -ggdb -std=gnu99 $(CPU_USAGE) $(FPU_USAGE) -static -lgcc
 #export LINKFLAGS += -T$(LINKERSCRIPT)
 export OFLAGS += -j .text -j .data -O ihex
 #export FFLAGS += -j .text -j .data -O ihex bin/$(BOARD)/$(PROJECT).elf bin/$(BOARD)/$(PROJECT).hex
-export FFLAGS += -p m2560 -c stk500v2 -P $(PORT) -b 115200 -F -U flash:w:bin/$(BOARD)/$(PROJECT).hex
+export FFLAGS += -p m2560 -c stk500v2 -P $(PORT) -b 115200 -F -U flash:w:bin/$(BOARD)/$(PROJECT)$(APPLICATION).hex
 
 # additional compiler and linker flags to enable newlib-nano and optimize for it
 # CAREFUL: newlib-nano is not supported by the ubuntu arm-none-eabi- toolchain, so its disabled by default
