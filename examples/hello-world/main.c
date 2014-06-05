@@ -24,5 +24,5 @@
 int main(void)
 {
     puts("Hello World!");
-//    return 0;
+    return 0;
 }
