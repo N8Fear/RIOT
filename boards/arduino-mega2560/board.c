@@ -31,14 +31,6 @@
 #define USART_BAUDRATE 9600
 #define BAUD_PRESCALE ((F_CPU / (USART_BAUDRATE * 16UL)) - 1)
 
-ISR(USART0_RX_vect, ISR_BLOCK)
-{
-	char rec_byte;
-	rec_byte = UDR0;
-	UDR0 = rec_byte;
-}
-/* defines: end */
-
 void init_uart(void)
 {
 _delay_ms(500);
@@ -56,7 +48,6 @@ static int uart_putchar(unsigned char c, FILE *stream)
 {
 	if (c == '\n')
 			uart_putchar('\r', stream);
-	loop_until_bit_is_set(UCSR0A, UDRE0);
 	while ( !(UCSR0A & (1 << UDRE0)) )
 		;
 	UDR0 = c;
@@ -70,10 +61,8 @@ static FILE mystdout = FDEV_SETUP_STREAM(uart_putchar, NULL, _FDEV_SETUP_WRITE);
 
 /*prototypes: end */
 
-//void board_init(void)
-void main (void)
+void board_init(void)
 {
-	//_delay_ms(500);
     /* initialize core clocks via CMSIS function provided by Atmel */
  //   SystemInit();
 
