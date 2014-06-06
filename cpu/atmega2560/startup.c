@@ -21,6 +21,7 @@
 #include <stdint.h>
 #include <avr/interrupt.h>
 #include <avr/io.h>
+#include <util/delay.h>
 
 
 /**
@@ -64,9 +65,21 @@ void init8_ovr(void)
  * 5. initialize and start RIOTs kernel
  */
 
-int reset_handler(void)
+void reset_handler(void)
 {
-	board_init();
+    /* initialize the board and startup the kernel */
+    board_init();
+    /* initialize std-c library (this should be done after board_init) */
+//    __libc_init_array();
+    /* startup the kernel */
+    //kernel_init();
+	while (1) {
+		printf("ATmega 2560 initialized!\n");
+		_delay_ms(500);
+		_delay_ms(500);
+		_delay_ms(500);
+		_delay_ms(500);
+	}
 }
 
 /**
@@ -76,7 +89,7 @@ int reset_handler(void)
  * TODO: should be removed after getting linkage without it, should in theory
  * lead to possible symbol collisions.
  */
-void main (void) {}
+int main (void) {return 0;}
 
 /**
  * @brief Default handler is called in case no interrupt handler was defined
