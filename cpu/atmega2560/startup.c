@@ -21,7 +21,11 @@
 #include <stdint.h>
 #include <avr/interrupt.h>
 #include <avr/io.h>
+
+/* For Catchall-Loop */
+#include "board.h"
 #include <util/delay.h>
+#include <stdio.h>
 
 
 /**
@@ -72,9 +76,9 @@ void reset_handler(void)
     /* initialize std-c library (this should be done after board_init) */
 //    __libc_init_array();
     /* startup the kernel */
-    //kernel_init();
+    kernel_init();
 	while (1) {
-		printf("ATmega 2560 initialized!\n");
+		printf("Catchall-Loop: kernel_init() returned!\n");
 		_delay_ms(500);
 		_delay_ms(500);
 		_delay_ms(500);
