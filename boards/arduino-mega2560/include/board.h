@@ -63,8 +63,7 @@
 /**
  * @brief Initialize board specific hardware, including clock, LEDs and std-IO
  */
-void board_init(void) __attribute__((naked)) __attribute((section (".init8")));
-//void board_init(void);
+void board_init(void);
 
 
 #endif /** __BOARD_H */
