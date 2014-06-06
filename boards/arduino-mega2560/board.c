@@ -33,8 +33,6 @@
 
 void init_uart(void)
 {
-_delay_ms(500);
-	UDR0 = 000000000000000000000000000000000000000;
 	UCSR0B |= (1 << RXEN0) | (1 << TXEN0); // turn on rx and tx
 	UCSR0C |= (1 << UCSZ00) | (1 << UCSZ01); // 8 Bit characters
 
@@ -64,7 +62,7 @@ static FILE mystdout = FDEV_SETUP_STREAM(uart_putchar, NULL, _FDEV_SETUP_WRITE);
 void board_init(void)
 {
     /* initialize core clocks via CMSIS function provided by Atmel */
-    SystemInit();
+//    SystemInit();
 
     /* initialize the CPU */
     cpu_init();
@@ -74,8 +72,12 @@ void board_init(void)
 
 	/* hardcoded UART stuff from extern project */
 	init_uart();
+	/* Global interrupts enable */
 	sei();
+
 	stdout=&mystdout;
+	/* Flush stdout */
+	puts("\r");
 }
 
 
