@@ -64,25 +64,18 @@ static FILE mystdout = FDEV_SETUP_STREAM(uart_putchar, NULL, _FDEV_SETUP_WRITE);
 void board_init(void)
 {
     /* initialize core clocks via CMSIS function provided by Atmel */
- //   SystemInit();
+    SystemInit();
 
     /* initialize the CPU */
-  //  cpu_init();
+    cpu_init();
 
     /* initialize the boards LEDs */
-   // led_init();
+    led_init();
 
 	/* hardcoded UART stuff from extern project */
 	init_uart();
 	sei();
 	stdout=&mystdout;
-	while (1) {
-		printf("ATmega 2560 initialized!\n");
-		_delay_ms(500);
-		_delay_ms(500);
-		_delay_ms(500);
-		_delay_ms(500);
-	}
 }
 
 
