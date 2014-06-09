@@ -87,15 +87,6 @@ void reset_handler(void)
 }
 
 /**
- * @brief Dummy main function
- * This one is needed because otherwise the linker doesn't even link this file
- * causing the main from the application directly.
- * TODO: should be removed after getting linkage without it, should in theory
- * lead to possible symbol collisions.
- */
-int main (void) {return 0;}
-
-/**
  * @brief Default handler is called in case no interrupt handler was defined
  */
 void dummy_handler(void)
