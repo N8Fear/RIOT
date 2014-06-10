@@ -7,7 +7,7 @@
  */
 
 /**
- * @ingroup     cpu_cortexm_common
+ * @ingroup     cpu_atmega_common
  * @{
  *
  * @file        atomic_arch.c
@@ -24,5 +24,9 @@
 
 unsigned int atomic_arch_set_return(unsigned int *to_set, unsigned int value)
 {
-	return 6;
+    disableIRQ();
+    unsigned int old = *to_set;
+    *to_set = value;
+    enableIRQ();
+    return old;
 }
