@@ -7,13 +7,14 @@
  */
 
 /**
- * @ingroup     cpu_cortexm_common
+ * @ingroup     cpu_atmega_common
  * @{
  *
  * @file        irq_arch.c
  * @brief       Implementation of the kernels irq interface
  *
  * @author      Hauke Petersen <hauke.petersen@fu-berlin.de>
+ * @author      Hinnerk van Bruinehsen <h.v.bruinehsen@fu-berlin.de>
  *
  * @}
  */
@@ -27,7 +28,10 @@
  */
 unsigned int irq_arch_disable(void)
 {
-	return 6;
+	/* TODO: check if 32 bit is necessary here */
+    uint32_t mask = __get_interrupt_state();
+    cli();
+    return mask;
 }
 
 /**
@@ -35,7 +39,8 @@ unsigned int irq_arch_disable(void)
  */
 unsigned int irq_arch_enable(void)
 {
-	return 6;
+    sei();
+    return __get_interrupt_state();
 }
 
 /**
@@ -43,7 +48,7 @@ unsigned int irq_arch_enable(void)
  */
 void irq_arch_restore(unsigned int state)
 {
-;	
+	__set_interrupt_state(state);
 }
 
 /**
@@ -51,5 +56,6 @@ void irq_arch_restore(unsigned int state)
  */
 int irq_arch_in(void)
 {
-	return 6;
+    //TODO: find a way to implement this function
+	return 0;
 }
