@@ -7,13 +7,13 @@
  */
 
 /**
- * @ingroup     cpu_sam3x8e
+ * @ingroup     cpu_atmega2560
  * @{
  *
  * @file        lpm_arch.c
  * @brief       Implementation of the kernels power management interface
  *
- * @author      Hauke Petersen <hauke.petersen@fu-berlin.de>
+ * @author      Hinnerk van Bruinehsen <h.v.bruinehsen@fu-berlin.de>
  *
  * @}
  */

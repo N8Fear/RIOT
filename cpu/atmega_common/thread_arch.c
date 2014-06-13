@@ -7,7 +7,7 @@
  */
 
 /**
- * @ingroup     cpu_cortexm_common
+ * @ingroup     cpu_atmega_common
  * @{
  *
  * @file        thread_arch.c
@@ -15,6 +15,7 @@
  *
  * @author      Stefan Pfeiffer <stefan.pfeiffer@fu-berlin.de>
  * @author      Hauke Petersen <hauke.petersen@fu-berlin.de>
+ * @author      Hinnerk van Bruinehsen <h.v.bruinehsen@fu-berlin.de>
  *
  * @}
  */
@@ -34,7 +35,7 @@
 #define STACK_MARKER                (0x77777777)
 
 /**
- * @name ARM Cortex-M specific exception return value, that triggers the return to the task mode
+ * @name ATmega specific exception return value, that triggers the return to the task mode
  *       stack pointer
  */
 #define EXCEPT_RET_TASK_MODE        (0xfffffffd)
@@ -44,22 +45,6 @@ static void context_save(void);
 static void context_restore(void);
 static void enter_thread_mode(void);
 
-/**
- * Cortex-M knows stacks and handles register backups, so use different stack frame layout
- *
- * TODO: How to handle different Cortex-Ms? Code is so far valid for M3 and M4 without FPU
- *
- * Layout with storage of floating point registers (applicable for Cortex-M4):
- * ------------------------------------------------------------------------------------------------------------------------------------
- * | R0 | R1 | R2 | R3 | LR | PC | xPSR | S0 | S1 | S2 | S3 | S4 | S5 | S6 | S7 | S8 | S9 | S10 | S11 | S12 | S13 | S14 | S15 | FPSCR |
- * ------------------------------------------------------------------------------------------------------------------------------------
- *
- * Layout without floating point registers:
- * --------------------------------------
- * | R0 | R1 | R2 | R3 | LR | PC | xPSR |
- * --------------------------------------
- *
- */
 char *thread_arch_stack_init(void  (*task_func)(void), void *stack_start, int stack_size)
 {
 	char * x = (char *) &thread_arch_stack_init;

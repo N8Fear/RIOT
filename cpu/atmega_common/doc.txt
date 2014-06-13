@@ -1,40 +1,40 @@
 /**
- * @defgroup    cortexm Cortex-M
- * @brief       ARM Cortex-M specific code
+ * @defgroup    atmega ATmega
+ * @brief       AVR Atmega specific code
  * @ingroup     cpu
  */
 
 /**
  * @defgroup    CMSIS_Core_FunctionInterface
- * @ingroup     cortexm
+ * @ingroup     atmega
  */
 
 /**
  * @defgroup    CMSIS_core_register
- * @ingroup     cortexm
+ * @ingroup     atmega
  */
 
 /**
  * @defgroup    CMSIS_glob_defs
- * @ingroup     cortexm
+ * @ingroup     atmega
  */
 
 /**
  * @defgroup    CMSIS_MISRA_Exceptions
- * @ingroup     cortexm
+ * @ingroup     atmega
  */
 
 /**
  * @defgroup    CMSIS_core_definitions
- * @ingroup     cortexm
+ * @ingroup     atmega
  */
 
 /**
  * @defgroup    CMSIS_SIMD_intrinsics
- * @ingroup     cortexm
+ * @ingroup     atmega
  */
 
 /**
  * @defgroup    CMSIS_Core_InstructionInterface
- * @ingroup     cortexm
+ * @ingroup     atmega
  */

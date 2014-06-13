@@ -7,13 +7,13 @@
  */
 
 /**
- * @ingroup         cpu_sam3x8e
+ * @ingroup         cpu_atmega2560
  * @{
  *
  * @file            hwtimer_cpu.h
  * @brief           CPU specific hwtimer configuration options
  *
- * @author          Hauke Petersen <hauke.petersen@fu-berlin.de>
+ * @author          Hinnerk van Bruinehsen <h.v.bruinehsen@fu-berlin.de>
  */
 
 #ifndef __HWTIMER_CPU_H
