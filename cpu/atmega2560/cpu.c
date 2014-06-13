@@ -7,13 +7,13 @@
  */
 
 /**
- * @ingroup     cpu_sam3x8e
+ * @ingroup     cpu_atmega2560
  * @{
  *
  * @file        cpu.c
  * @brief       Implementation of the CPU initialization
  *
- * @author      Hauke Petersen <hauke.petersen@fu-berlin.de>
+ * @author      Hinnerk van Bruinehsen <h.v.bruinehsen@fu-berlin.de>
  * @}
  */
 
