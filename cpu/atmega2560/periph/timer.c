@@ -11,9 +11,10 @@
  * @{
  * 
  * @file        timer.c
- * @brief       Low-level timer driver implementation for the SAM3X8E CPU
+ * @brief       Low-level timer driver implementation for the ATmega2560 CPU
  *
  * @author      Hauke Petersen <hauke.petersen@fu-berlin.de>
+ * @author      Hinnerk van Bruinehsen <h.v.bruinehsen@fu-berlin.de>
  * 
  * @}
  */
@@ -37,6 +38,7 @@ typedef struct {
  */
 timer_conf_t config[TIMER_NUMOF];
 
+//TODO: implementation missing
 
 /**
  * @brief Setup the given timer
