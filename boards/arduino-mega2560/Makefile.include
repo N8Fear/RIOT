@@ -16,7 +16,7 @@ export TERMPROG = $(RIOTBASE)/dist/tools/pyterm/pyterm.py
 OS = $(shell uname)
 ifeq ($(OS),Linux)
   PORT ?= /dev/ttyACM0
-  FLASHER = avrdude 
+  FLASHER = avrdude
 #else ifeq ($(OS),Darwin)
 #  PORT ?= $(shell ls -1 /dev/tty.usbmodem* | head -n 1)
 #  FLASHER = stty -f $(PORT) raw ispeed 1200 ospeed 1200 cs8 -cstopb ignpar eol 255 eof 255; $(RIOTBOARD)/$(BOARD)/dist/bossac_osx
