@@ -7,15 +7,16 @@
  */
 
 /**
- * @ingroup     cpu_sam3x8e
+ * @ingroup     cpu_atmega2560
  * @{
  *
  * @file        hwtimer_arch.c
  * @brief       Implementation of the kernels hwtimer interface
  *
- * The hardware timer implementation uses the Cortex build-in system timer as back-end.
+ * The hardware timer implementation uses the ATmega2560 build-in system timer as back-end.
  *
  * @author      Hauke Petersen <hauke.petersen@fu-berlin.de>
+ * @author		Hinnerk van Bruinehsen <h.v.bruinehsen@fu-berlin.de>
  *
  * @}
  */
