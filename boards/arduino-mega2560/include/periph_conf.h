@@ -7,13 +7,13 @@
  */
 
 /**
- * @ingroup     board_arduino-due
+ * @ingroup     board_arduino-mega2560
  * @{
  *
  * @file        periph_conf.h
- * @brief       Peripheral MCU configuration for the Arduino Due board
+ * @brief       Peripheral MCU configuration for the Arduino Mega 2560 board
  *
- * @author      Hauke Petersen <hauke.petersen@fu-berlin.de>
+ * @author      Hinnerk van Bruinehsen <h.v.bruinehsen@fu-berlin.de>
  */
 
 #ifndef __PERIPH_CONF_H
