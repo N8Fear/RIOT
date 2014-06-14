@@ -7,13 +7,13 @@
  */
 
 /**
- * @ingroup     board_arduino-due
+ * @ingroup     board_arduino-mega2560
  * @{
  *
  * @file        board.c
- * @brief       Board specific implementations for the Arduino Due board
+ * @brief       Board specific implementations for the Arduino Mega 2560 board
  *
- * @author      Hauke Petersen <hauke.petersen@fu-berlin.de>
+ * @author	    Hinnerk van Bruinehsen <h.v.bruinehsen@fu-berlin.de>
  *
  * @}
  */

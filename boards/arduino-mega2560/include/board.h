@@ -7,15 +7,15 @@
  */
 
 /**
- * @defgroup    board_arduino-due Arduino Due
+ * @defgroup    board_arduino-mega2560 Arduino Mega 2560
  * @ingroup     boards
- * @brief       Board specific files for the Arduino Due board.
+ * @brief       Board specific files for the Arduino Mega 2560 board.
  * @{
  *
  * @file        board.h
- * @brief       Board specific definitions for the Arduino Due board.
+ * @brief       Board specific definitions for the Arduino Mega 2560 board.
  *
- * @author      Hauke Petersen <hauke.petersen@fu-berlin.de>
+ * @author      Hinnerk van Bruinehsen <h.v.bruinehsen@fu-berlin.de>
  */
 
 #ifndef __BOARD_H
