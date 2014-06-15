@@ -92,6 +92,9 @@ void board_init(void)
  */
 void led_init(void)
 {
+	DDRB = 0xFF;
+	DDRH = 0xFF;
+	DDRE = 0xFF;
 //    /* enable PIO control of pin PD27 */
 //    LED_PORT->PIO_PER = LED_PIN;
 //    /* set pin as output */
