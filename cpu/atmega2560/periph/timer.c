@@ -31,7 +31,7 @@
 /* TODO: for debugging: remove me: */
 #include <avr/io.h>
 #include <avr/interrupt.h>
-#define PIN( X ) 1<<X
+
 typedef struct {
     void (*cb)(int);
 } timer_conf_t;
@@ -57,39 +57,46 @@ timer_conf_t config[TIMER_NUMOF];
  */
 int timer_init(tim_t dev, unsigned int ticks_per_us, void (*callback)(int))
 {
-//    Tc *tim;
-	/* TODO: use ticks_per_us - right now we use a static divider of 8 and
-	 * therefor get one tick each 0.5 µs
+    //Tc *tim;
+	/* TODO: correctlyuse ticks_per_us
 	 */
 
     /* select the timer and enable the timer specific peripheral clocks */
     switch (dev) {
 #if TIMER_0_EN
         case TIMER_0:
-			printf("Initializing TIMER_0...\n");
 			TCCR1A = 0;
 			TCCR1B = 0;
+			TCNT1  = 0;
 
-			TCNT1= 0;
-			TCCR1B |= (1 << CS01);
+			//OCR1A= ((F_CPU/10000000) ) * ticks_per_us;
+			OCR1A= 1000 * ticks_per_us;
+
+			TCCR1B |= (1 << CS02)|(1 << CS00)|(1 << WGM12);
             break;
 #endif
 #if TIMER_1_EN
         case TIMER_1:
 			TCCR3A = 0;
 			TCCR3B = 0;
+			TCNT3  = 0;
 
-			TCNT3= 0;
-			TCCR3B |= (1 << CS01);
+			//OCR3A= ((F_CPU/10000000) ) * ticks_per_us;
+			OCR3A= 1000 * ticks_per_us;
+
+			TCCR3B |= (1 << CS02)|(1 << CS00)|(1 << WGM12);
             break;
 #endif
 #if TIMER_2_EN
         case TIMER_2:
 			TCCR4A = 0;
 			TCCR4B = 0;
+			TCNT4  = 0;
 
-			TCNT4= 0;
-			TCCR4B |= (1 << CS01);
+			//OCR4A= ((F_CPU/10000000) ) * ticks_per_us;
+			OCR4A= 1000 * ticks_per_us;
+
+			TCCR4B |= (1 << CS02)|(1 << CS00)|(1 << WGM12);
             break;
 #endif
         case TIMER_UNDEFINED:
@@ -224,6 +231,7 @@ int timer_clear(tim_t dev, int channel)
  * have the same value (they run in parallel), so only on of them is returned.
  */
 unsigned int timer_read(tim_t dev)
+	//TODO: needs to be implemented
 {
     switch (dev) {
 #if TIMER_0_EN
@@ -252,17 +260,17 @@ void timer_stop(tim_t dev)
     switch (dev) {
 #if TIMER_0_EN
         case TIMER_0:
-			TCCR1B &= ~((1 << CS02) | (1<< CS00));
+			TCCR1B &= ~((1 << CS02)|(1 << CS00)|(1 << WGM12));
             break;
 #endif
 #if TIMER_1_EN
         case TIMER_1:
-			TCCR3B &= ~((1 << CS02) | (1<< CS00));
+			TCCR3B &= ~((1 << CS02)|(1 << CS00)|(1 << WGM12));
             break;
 #endif
 #if TIMER_2_EN
         case TIMER_2:
-			TCCR4B &= ~((1 << CS02) | (1<< CS00));
+			TCCR4B &= ~((1 << CS02)|(1 << CS00)|(1 << WGM12));
             break;
 #endif
         case TIMER_UNDEFINED:
@@ -275,17 +283,17 @@ void timer_start(tim_t dev)
     switch (dev) {
 #if TIMER_0_EN
         case TIMER_0:
-			TCCR1B |= (1 << CS02) | (1<< CS00);
+			TCCR1B |= (1 << CS02)|(1 << CS00)|(1 << WGM12);
             break;
 #endif
 #if TIMER_1_EN
         case TIMER_1:
-			TCCR3B |= (1 << CS02) | (1<< CS00);
+			TCCR3B |= (1 << CS02)|(1 << CS00)|(1 << WGM12);
             break;
 #endif
 #if TIMER_2_EN
         case TIMER_2:
-			TCCR4B |= (1 << CS02) | (1<< CS00);
+			TCCR3B |= (1 << CS02)|(1 << CS00)|(1 << WGM12);
             break;
 #endif
         case TIMER_UNDEFINED:
@@ -298,19 +306,17 @@ void timer_irq_enable(tim_t dev)
     switch (dev) {
 #if TIMER_0_EN
         case TIMER_0:
-			printf("Enabling interrupt for TIMER_=...\n");
-			TIMSK1 |= (1<<TOIE1);
-	PORTB ^= PIN(7);
+			TIMSK1 |= (1 << OCIE1A);
             break;
 #endif
 #if TIMER_1_EN
         case TIMER_1:
-			TIMSK3 |= (1<<TOIE3);
+			TIMSK3 |= (1 << OCIE3A);
             break;
 #endif
 #if TIMER_2_EN
         case TIMER_2:
-			TIMSK4 |= (1<<TOIE4);
+			TIMSK4 |= (1 << OCIE4A);
             break;
 #endif
         case TIMER_UNDEFINED:
@@ -324,17 +330,17 @@ void timer_irq_disable(tim_t dev)
     switch (dev) {
 #if TIMER_0_EN
         case TIMER_0:
-			TIMSK1 &= ~(1<<TOIE1);
+			TIMSK1 &= ~(1 << OCIE1A);
             break;
 #endif
 #if TIMER_1_EN
         case TIMER_1:
-			TIMSK3 &= ~(1<<TOIE3);
+			TIMSK3 &= ~(1 << OCIE3A);
             break;
 #endif
 #if TIMER_2_EN
         case TIMER_2:
-			TIMSK3 &= ~(1<<TOIE3);
+			TIMSK4 &= ~(1 << OCIE4A);
             break;
 #endif
         case TIMER_UNDEFINED:
@@ -368,17 +374,17 @@ void timer_reset(tim_t dev)
 
 #if TIMER_0_EN
 /* TODO: implement channel logic */
-ISR(TIMER1_OVF_vect, ISR_BLOCK)
+ISR(TIMER1_COMPA_vect, ISR_BLOCK)
 {
-	PORTB ^= PIN(7);
-	TCNT1=0;
-	//config[TIMER_0].cb(0);
+	PORTB ^= (1 << 7);
+	printf("T1 COMPA\n");
+//	config[TIMER_0].cb(1);
 }
 #endif /* TIMER_0_EN */
 
 #if TIMER_1_EN
 /* TODO: implement channel logic */
-ISR(TIMER3_OVF_vect)
+ISR(TIMER3_COMPA_vect, ISR_BLOCK)
 {
 	TCNT3=0;
 	config[TIMER_1].cb(0);
@@ -387,10 +393,9 @@ ISR(TIMER3_OVF_vect)
 
 #if TIMER_2_EN
 /* TODO: implement channel logic */
-ISR(TIMER4_OVF_vect)
+ISR(TIMER4_COMPA_vect, ISR_BLOCK)
 {
 	TCNT4=0;
 	config[TIMER_2].cb(0);
-	asm( "reti" );
 }
 #endif /* TIMER_2_EN */
