@@ -32,23 +32,46 @@
  *
  * This marker is used e.g. by *thread_arch_start_threading* to identify the stacks start.
  */
-#define STACK_MARKER                (0x77777777)
-
-/**
- * @name ATmega specific exception return value, that triggers the return to the task mode
- *       stack pointer
- */
-#define EXCEPT_RET_TASK_MODE        (0xfffffffd)
+#define STACK_MARKER                (0xAFFE)
 
 
-static void context_save(void);
-static void context_restore(void);
+static void __context_save(void);
+static void __context_restore(void);
 static void enter_thread_mode(void);
 
 char *thread_arch_stack_init(void  (*task_func)(void), void *stack_start, int stack_size)
 {
-	char * x = (char *) &thread_arch_stack_init;
-	return x;
+	printf("Creating a new stack...\n");
+
+	/* AVR uses 16 Bit for pointers*/
+	uint16_t *stk;
+	stk = (uint16_t *)(stack_start + stack_size);
+
+	/* put marker on stack */
+	stk--;
+	*stk = (uint16_t) STACK_MARKER;
+
+	/* program counter */
+	stk--;
+	*stk = (uint16_t)task_func;
+
+	/* exit */
+	stk--;
+	*stk = (uint16_t)sched_task_exit;
+
+	/* status register */
+	stk--;
+	*stk = (uint16_t) SREG;
+
+	/* Space for registers */
+	int i;
+	for (i = 0; i<32 ; i++) {
+		stk--;
+		*stk = i;
+	}
+
+	printf("Stack was successfully created...\n");
+	return (char *) stk;
 }
 
 void thread_arch_stack_print(void)
@@ -58,41 +81,38 @@ void thread_arch_stack_print(void)
 
 void thread_arch_start_threading(void)
 {
-	;
+	sched_run();
+	enableIRQ();
+	printf("Start Threading...\n");
+	enter_thread_mode();
 }
 
 /**
  * @brief Set the MCU into Thread-Mode and load the initial task from the stack and run it
  */
-void enter_thread_mode(void)
+void NORETURN enter_thread_mode(void)
 {
 
 }
 
 void thread_arch_yield(void)
 {
+	__context_save();
 
+	disableIRQ();
+	sched_run();
+	enableIRQ();
+
+	__context_restore();
 }
 
-/**
- * @brief SVC interrupt handler (to be discussed if this is really needed)
- */
-__attribute__((naked)) void isr_svc(void)
+
+__attribute__((always_inline)) static inline void __context_save(void)
 {
 
 }
 
-__attribute__((naked)) void isr_pendsv(void)
-{
-
-}
-
-__attribute__((always_inline)) static inline void context_save(void)
-{
-
-}
-
-__attribute__((always_inline)) static inline void context_restore(void)
+__attribute__((always_inline)) static inline void __context_restore(void)
 {
 
 }
