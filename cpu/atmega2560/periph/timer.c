@@ -377,7 +377,6 @@ void timer_reset(tim_t dev)
 ISR(TIMER1_COMPA_vect, ISR_BLOCK)
 {
 	PORTB ^= (1 << 7);
-	printf("T1 COMPA\n");
 //	config[TIMER_0].cb(1);
 }
 #endif /* TIMER_0_EN */
