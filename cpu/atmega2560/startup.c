@@ -77,12 +77,10 @@ void reset_handler(void)
 //    __libc_init_array();
     /* startup the kernel */
     kernel_init();
+	// TODO: remove catchall loop
 	while (1) {
 		printf("Catchall-Loop: kernel_init() returned!\n");
-		_delay_ms(500);
-		_delay_ms(500);
-		_delay_ms(500);
-		_delay_ms(500);
+		_delay_ms(2000);
 	}
 }
 
