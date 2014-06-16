@@ -23,13 +23,13 @@
 /**
  * @name Kernel configuration
  *
- * TODO: measure and adjust for the cortex-m3
+ * TODO: measure and adjust for the atmega2560
  * @{
  */
-#define KERNEL_CONF_STACKSIZE_PRINTF    (2500)
+#define KERNEL_CONF_STACKSIZE_PRINTF    (1000)
 
 #ifndef KERNEL_CONF_STACKSIZE_DEFAULT
-#define KERNEL_CONF_STACKSIZE_DEFAULT   (2500)
+#define KERNEL_CONF_STACKSIZE_DEFAULT   (1000)
 #endif
 
 #define KERNEL_CONF_STACKSIZE_IDLE      (512)
