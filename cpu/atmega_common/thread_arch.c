@@ -54,11 +54,15 @@ char *thread_arch_stack_init(void  (*task_func)(void), void *stack_start, int st
 	stk--;
 	*stk = (uint8_t) 0xAF;
 
-	///* exit */
-	//stk--;
-	//*stk = (uint16_t)sched_task_exit;
+	/* save sched_task_exit */
+	stk--;
+	tmp_adress = (uint16_t) sched_task_exit;
+	*stk = (uint8_t) (tmp_adress & (uint16_t) 0x00ff);
+	stk--;
+	tmp_adress >>= 8;
+	*stk = (uint8_t) (tmp_adress & (uint16_t) 0x00ff);
 
-	/* program counter */
+	/* save program counter */
 	stk--;
 	tmp_adress = (uint16_t) task_func;
 	*stk = (uint8_t) (tmp_adress & (uint16_t) 0x00ff);
@@ -85,15 +89,12 @@ char *thread_arch_stack_init(void  (*task_func)(void), void *stack_start, int st
 
 	/* Space for registers r1 -r31 */
 	int i;
-	for (i = 0; i<31 ; i++) {
+	for (i = 1; i<=32 ; i++) {
 		stk--;
-		*stk = i;
+		*stk = (uint8_t) i;
 	}
 
-	/* Space for saved Stackpointer */
-//	stk--;
-//	*stk = stk;
-//
+	stk--;
 	return (char *) stk;
 }
 
@@ -122,14 +123,13 @@ void NORETURN enter_thread_mode(void)
 	PINB = (1 << PB0);
 
 	UNREACHABLE();
-
 }
 
 void thread_arch_yield(void)
 {
 	__context_save();
 
-	disableIRQ();
+//	disableIRQ(); // should still be deactivated
 	sched_run();
 	enableIRQ();
 
@@ -138,7 +138,6 @@ void thread_arch_yield(void)
 
 ISR(PCINT0_vect, ISR_NAKED)
 {
-	sched_run();
 	__context_restore();
 	asm volatile ("reti");
 }
@@ -199,7 +198,6 @@ __attribute__((always_inline)) static inline void __context_save(void)
 
 __attribute__((always_inline)) static inline void __context_restore(void)
 {
-	printf("restoring: %s\n", sched_active_thread->name);
 	asm volatile (                                           \
 				  "lds  r26, sched_active_thread	   \n\t" \
 				  "lds  r27, sched_active_thread + 1   \n\t" \
