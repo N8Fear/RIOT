@@ -20,6 +20,8 @@
  * @}
  */
 
+#include <stdio.h>
+
 #include "arch/thread_arch.h"
 #include "sched.h"
 #include "irq.h"
@@ -39,20 +41,21 @@ static void __context_save(void);
 static void __context_restore(void);
 static void enter_thread_mode(void);
 
+static char *con_sp;
+
 char *thread_arch_stack_init(void  (*task_func)(void), void *stack_start, int stack_size)
 {
-	printf("Creating a new stack...\n");
+	uint16_t tmp_adress;
 	uint8_t *stk;
 
 	/* AVR uses 16 Bit or two 8 Bit registers for storing  pointers*/
-	uint16_t tmp_adress;
 	stk = (uint8_t *)(stack_start + stack_size);
 
 	/* put marker on stack */
 	stk--;
-	*stk = (uint8_t) 0xFE;
-	stk--;
 	*stk = (uint8_t) 0xAF;
+	stk--;
+	*stk = (uint8_t) 0xFE;
 
 	/* save sched_task_exit */
 	stk--;
@@ -100,7 +103,23 @@ char *thread_arch_stack_init(void  (*task_func)(void), void *stack_start, int st
 
 void thread_arch_stack_print(void)
 {
-    /* TODO */
+	char *base_pointer = (sched_active_thread->stack_start
+			   +sched_active_thread->stack_size
+			   -sizeof(tcb_t)+1
+			   );
+	printf("Basepointer: 0x%04X - Stacksize: %u - Stackpointer: 0x%04X\n",
+			(uint16_t) base_pointer,
+			sched_active_thread->stack_size,
+			(uint16_t) sched_active_thread->sp);
+	printf("=======Stack of %s:begin=======", sched_active_thread->name);
+	uint16_t i = 0;
+	while (sched_active_thread->sp != base_pointer) {
+		if (i%8 == 0)
+			printf("\n");
+		i++;
+		printf("%02X ", (uint8_t) *base_pointer--);
+	}
+	printf("\n=======Stack of %s:end=======\n",sched_active_thread->name);
 }
 
 void thread_arch_start_threading(void)
@@ -108,6 +127,7 @@ void thread_arch_start_threading(void)
 	sched_run();
 	enableIRQ();
 	printf("Start Threading...\n");
+	thread_arch_stack_print();
 	enter_thread_mode();
 }
 
@@ -139,12 +159,14 @@ void thread_arch_yield(void)
 ISR(PCINT0_vect, ISR_NAKED)
 {
 	__context_restore();
+	thread_arch_stack_print();
 	asm volatile ("reti");
 }
 
 
 __attribute__((always_inline)) static inline void __context_save(void)
 {
+	con_sp = sched_active_thread->sp;
 	asm volatile (                                           \
 			      "push r0                             \n\t" \
 				  "in   r0, __SREG__                   \n\t" \
@@ -186,8 +208,8 @@ __attribute__((always_inline)) static inline void __context_save(void)
 				  "push r29                            \n\t" \
 				  "push r30                            \n\t" \
 				  "push r31                            \n\t" \
-				  "lds  r26, sched_active_thread	   \n\t" \
-				  "lds  r27, sched_active_thread + 1   \n\t" \
+				  "lds  r26, con_sp					   \n\t" \
+				  "lds  r27, con_sp	+ 1				   \n\t" \
 				  "in   r0, __SP_L__				   \n\t" \
 				  "st   x+, r0						   \n\t" \
 				  "in   r0, __SP_H__				   \n\t" \
@@ -198,9 +220,10 @@ __attribute__((always_inline)) static inline void __context_save(void)
 
 __attribute__((always_inline)) static inline void __context_restore(void)
 {
+	con_sp = sched_active_thread->sp;
 	asm volatile (                                           \
-				  "lds  r26, sched_active_thread	   \n\t" \
-				  "lds  r27, sched_active_thread + 1   \n\t" \
+				  "lds  r26, con_sp					   \n\t" \
+				  "lds  r27, con_sp + 1                \n\t" \
 				  "ld   r28, x+						   \n\t" \
 				  "out  __SP_L__, r28				   \n\t" \
 				  "ld   r29, x+						   \n\t" \
