@@ -41,8 +41,6 @@ static void __context_save(void);
 static void __context_restore(void);
 static void enter_thread_mode(void);
 
-static char *con_sp;
-
 char *thread_arch_stack_init(void  (*task_func)(void), void *stack_start, int stack_size)
 {
 	uint16_t tmp_adress;
@@ -72,8 +70,8 @@ char *thread_arch_stack_init(void  (*task_func)(void), void *stack_start, int st
 	stk--;
 	tmp_adress >>= 8;
 	*stk = (uint8_t) (tmp_adress & (uint16_t) 0x00ff);
-	stk--;
-	*stk = 0;
+//	stk--;
+//	*stk = 0;
 
 	/* r0 */
 	stk--;
@@ -84,10 +82,10 @@ char *thread_arch_stack_init(void  (*task_func)(void), void *stack_start, int st
 	*stk = (uint8_t) SREG;
 
 	/* EIND and RAMPZ */
-	stk--;
-	*stk = (uint8_t) 0x00;
-	stk--;
-	*stk = (uint8_t) 0x00;
+//	stk--;
+//	*stk = (uint8_t) 0x00;
+//	stk--;
+//	*stk = (uint8_t) 0x00;
 
 
 	/* Space for registers r1 -r31 */
@@ -127,7 +125,7 @@ void thread_arch_start_threading(void)
 	sched_run();
 	enableIRQ();
 	printf("Start Threading...\n");
-	thread_arch_stack_print();
+//	thread_arch_stack_print();
 	enter_thread_mode();
 }
 
@@ -136,11 +134,9 @@ void thread_arch_start_threading(void)
  */
 void NORETURN enter_thread_mode(void)
 {
-	PCICR  |= (1 << PCIE0);
-	PCMSK0 |= (1 << PCINT0);
-
-	/* Software interrupt */
-	PINB = (1 << PB0);
+	__context_restore();
+//	thread_arch_stack_print();
+	asm volatile ("ret");
 
 	UNREACHABLE();
 }
@@ -149,122 +145,113 @@ void thread_arch_yield(void)
 {
 	__context_save();
 
-//	disableIRQ(); // should still be deactivated
+	disableIRQ(); // should still be deactivated
 	sched_run();
 	enableIRQ();
 
 	__context_restore();
 }
 
-ISR(PCINT0_vect, ISR_NAKED)
-{
-	__context_restore();
-	thread_arch_stack_print();
-	asm volatile ("reti");
-}
-
 
 __attribute__((always_inline)) static inline void __context_save(void)
 {
-	con_sp = sched_active_thread->sp;
-	asm volatile (                                           \
-			      "push r0                             \n\t" \
-				  "in   r0, __SREG__                   \n\t" \
-				  "cli                                 \n\t" \
-				  "push r0                             \n\t" \
-				  "in   r0, 0x3b                       \n\t" \
-				  "push r0                             \n\t" \
-				  "in   r0, 0x3c                       \n\t" \
-				  "push r0                             \n\t" \
-				  "push r1                             \n\t" \
-				  "clr  r1                             \n\t" \
-				  "push r2                             \n\t" \
-				  "push r3                             \n\t" \
-				  "push r4                             \n\t" \
-				  "push r5                             \n\t" \
-				  "push r6                             \n\t" \
-				  "push r7                             \n\t" \
-				  "push r8                             \n\t" \
-				  "push r9                             \n\t" \
-				  "push r10                            \n\t" \
-				  "push r11                            \n\t" \
-				  "push r12                            \n\t" \
-				  "push r13                            \n\t" \
-				  "push r14                            \n\t" \
-				  "push r15                            \n\t" \
-				  "push r16                            \n\t" \
-				  "push r17                            \n\t" \
-				  "push r18                            \n\t" \
-				  "push r19                            \n\t" \
-				  "push r20                            \n\t" \
-				  "push r21                            \n\t" \
-				  "push r22                            \n\t" \
-				  "push r23                            \n\t" \
-				  "push r24                            \n\t" \
-				  "push r25                            \n\t" \
-				  "push r26                            \n\t" \
-				  "push r27                            \n\t" \
-				  "push r28                            \n\t" \
-				  "push r29                            \n\t" \
-				  "push r30                            \n\t" \
-				  "push r31                            \n\t" \
-				  "lds  r26, con_sp					   \n\t" \
-				  "lds  r27, con_sp	+ 1				   \n\t" \
-				  "in   r0, __SP_L__				   \n\t" \
-				  "st   x+, r0						   \n\t" \
-				  "in   r0, __SP_H__				   \n\t" \
-				  "st   x+, r0						   \n\t" \
+	asm volatile (
+			      "push r0                             \n\t"
+				  "in   r0, __SREG__                   \n\t"
+				  "cli                                 \n\t"
+				  "push r0                             \n\t"
+//				  "in   r0, 0x3b                       \n\t"
+//				  "push r0                             \n\t"
+//				  "in   r0, 0x3c                       \n\t"
+//				  "push r0                             \n\t"
+				  "push r1                             \n\t"
+				  "clr  r1                             \n\t"
+				  "push r2                             \n\t"
+				  "push r3                             \n\t"
+				  "push r4                             \n\t"
+				  "push r5                             \n\t"
+				  "push r6                             \n\t"
+				  "push r7                             \n\t"
+				  "push r8                             \n\t"
+				  "push r9                             \n\t"
+				  "push r10                            \n\t"
+				  "push r11                            \n\t"
+				  "push r12                            \n\t"
+				  "push r13                            \n\t"
+				  "push r14                            \n\t"
+				  "push r15                            \n\t"
+				  "push r16                            \n\t"
+				  "push r17                            \n\t"
+				  "push r18                            \n\t"
+				  "push r19                            \n\t"
+				  "push r20                            \n\t"
+				  "push r21                            \n\t"
+				  "push r22                            \n\t"
+				  "push r23                            \n\t"
+				  "push r24                            \n\t"
+				  "push r25                            \n\t"
+				  "push r26                            \n\t"
+				  "push r27                            \n\t"
+				  "push r28                            \n\t"
+				  "push r29                            \n\t"
+				  "push r30                            \n\t"
+				  "push r31                            \n\t"
+				  "lds  r26, sched_active_thread	   \n\t"
+				  "lds  r27, sched_active_thread + 1   \n\t"
+				  "in   r0, __SP_L__				   \n\t"
+				  "st   x+, r0						   \n\t"
+				  "in   r0, __SP_H__				   \n\t"
+				  "st   x+, r0						   \n\t"
 	);
 
 }
 
 __attribute__((always_inline)) static inline void __context_restore(void)
 {
-	con_sp = sched_active_thread->sp;
-	asm volatile (                                           \
-				  "lds  r26, con_sp					   \n\t" \
-				  "lds  r27, con_sp + 1                \n\t" \
-				  "ld   r28, x+						   \n\t" \
-				  "out  __SP_L__, r28				   \n\t" \
-				  "ld   r29, x+						   \n\t" \
-				  "out  __SP_H__, r29				   \n\t" \
-				  "pop  r31                            \n\t" \
-				  "pop  r30                            \n\t" \
-				  "pop  r29                            \n\t" \
-				  "pop  r28                            \n\t" \
-				  "pop  r27                            \n\t" \
-				  "pop  r26                            \n\t" \
-				  "pop  r25                            \n\t" \
-				  "pop  r24                            \n\t" \
-				  "pop  r23                            \n\t" \
-				  "pop  r22                            \n\t" \
-				  "pop  r21                            \n\t" \
-				  "pop  r20                            \n\t" \
-				  "pop  r19                            \n\t" \
-				  "pop  r18                            \n\t" \
-				  "pop  r17                            \n\t" \
-				  "pop  r16                            \n\t" \
-				  "pop  r15                            \n\t" \
-				  "pop  r14                            \n\t" \
-				  "pop  r13                            \n\t" \
-				  "pop  r12                            \n\t" \
-				  "pop  r11                            \n\t" \
-				  "pop  r10                            \n\t" \
-				  "pop  r9                             \n\t" \
-				  "pop  r8                             \n\t" \
-				  "pop  r7                             \n\t" \
-				  "pop  r6                             \n\t" \
-				  "pop  r5                             \n\t" \
-				  "pop  r4                             \n\t" \
-				  "pop  r3                             \n\t" \
-				  "pop  r2                             \n\t" \
-				  "pop  r1                             \n\t" \
-				  "pop  r0                             \n\t" \
-				  "out  0x3c, r0                       \n\t" \
-				  "pop  r0                             \n\t" \
-				  "out  0x3b, r0                       \n\t" \
-				  "pop  r0                             \n\t" \
-				  "out  __SREG__, r0                   \n\t" \
-				  "pop  r0                             \n\t" \
+	asm volatile (
+				  "lds  r26, sched_active_thread	   \n\t"
+				  "lds  r27, sched_active_thread + 1   \n\t"
+				  "ld   r28, x+						   \n\t"
+				  "out  __SP_L__, r28				   \n\t"
+				  "ld   r29, x+						   \n\t"
+				  "out  __SP_H__, r29				   \n\t"
+				  "pop  r31                            \n\t"
+				  "pop  r30                            \n\t"
+				  "pop  r29                            \n\t"
+				  "pop  r28                            \n\t"
+				  "pop  r27                            \n\t"
+				  "pop  r26                            \n\t"
+				  "pop  r25                            \n\t"
+				  "pop  r24                            \n\t"
+				  "pop  r23                            \n\t"
+				  "pop  r22                            \n\t"
+				  "pop  r21                            \n\t"
+				  "pop  r20                            \n\t"
+				  "pop  r19                            \n\t"
+				  "pop  r18                            \n\t"
+				  "pop  r17                            \n\t"
+				  "pop  r16                            \n\t"
+				  "pop  r15                            \n\t"
+				  "pop  r14                            \n\t"
+				  "pop  r13                            \n\t"
+				  "pop  r12                            \n\t"
+				  "pop  r11                            \n\t"
+				  "pop  r10                            \n\t"
+				  "pop  r9                             \n\t"
+				  "pop  r8                             \n\t"
+				  "pop  r7                             \n\t"
+				  "pop  r6                             \n\t"
+				  "pop  r5                             \n\t"
+				  "pop  r4                             \n\t"
+				  "pop  r3                             \n\t"
+				  "pop  r2                             \n\t"
+				  "pop  r1                             \n\t"
+				  "pop  r0                             \n\t"
+//				  "out  0x3c, r0                       \n\t"
+//				  "pop  r0                             \n\t"
+//				  "out  0x3b, r0                       \n\t"
+//				  "pop  r0                             \n\t"
+				  "out  __SREG__, r0                   \n\t"
+				  "pop  r0                             \n\t"
 	);
 }
