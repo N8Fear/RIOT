@@ -35,7 +35,7 @@ static void __context_restore(void);
 static void __enter_thread_mode(void);
 
 /**
- * @brief Since AVR doesn't support direct manipulation of the process counter we
+ * @brief Since AVR doesn't support direct manipulation of the program counter we
  * model a stack like it would be left by __context_save().
  * The resulting layout in memory is the following:
  * ---------------tcb_t (not created by thread_arch_stack_init) ----------
@@ -46,7 +46,7 @@ static void __enter_thread_mode(void);
  * a 16 Bit pointer to sched_task_exit
  * -----------------------------------------------------------------------
  * a 16 Bit pointer to task_func
- * this is placed exactly at the place where the process counter would be
+ * this is placed exactly at the place where the program counter would be
  * stored normally and thus can be returned to when __context_restore()
  * has been run
  * -----------------------------------------------------------------------
