@@ -74,14 +74,9 @@ void reset_handler(void)
     /* initialize the board and startup the kernel */
     board_init();
     /* initialize std-c library (this should be done after board_init) */
-//    __libc_init_array();
+/*   __libc_init_array(); // seems unnecessary for avr-libc */
     /* startup the kernel */
     kernel_init();
-	// TODO: remove catchall loop
-	while (1) {
-		printf("Catchall-Loop: kernel_init() returned!\n");
-		_delay_ms(2000);
-	}
 }
 
 /**
