@@ -13,8 +13,6 @@
  * @file        thread_arch.c
  * @brief       Implementation of the kernel's architecture dependent thread interface
  *
- * @author      Stefan Pfeiffer <stefan.pfeiffer@fu-berlin.de>
- * @author      Hauke Petersen <hauke.petersen@fu-berlin.de>
  * @author      Hinnerk van Bruinehsen <h.v.bruinehsen@fu-berlin.de>
  *
  * @}
@@ -28,19 +26,38 @@
 #include "cpu.h"
 #include "kernel_internal.h"
 
-
-/**
- * @name noticeable marker marking the beginning of a stack segment
- *
- * This marker is used e.g. by *thread_arch_start_threading* to identify the stacks start.
+/*
+ * local function declarations  (prefixed with __)
  */
-#define STACK_MARKER                (0xAFFE)
-
 
 static void __context_save(void);
 static void __context_restore(void);
-static void enter_thread_mode(void);
+static void __enter_thread_mode(void);
 
+/**
+ * @brief Since AVR doesn't support direct manipulation of the process counter we
+ * model a stack like it would be left by __context_save().
+ * The resulting layout in memory is the following:
+ * ---------------tcb_t (not created by thread_arch_stack_init) ----------
+ * local variables (a temporary value and the stackpointer)
+ * -----------------------------------------------------------------------
+ * a marker (AFFE) - for debugging purposes (helps finding the stack
+ * -----------------------------------------------------------------------
+ * a 16 Bit pointer to sched_task_exit
+ * -----------------------------------------------------------------------
+ * a 16 Bit pointer to task_func
+ * this is placed exactly at the place where the process counter would be
+ * stored normally and thus can be returned to when __context_restore()
+ * has been run
+ * -----------------------------------------------------------------------
+ * saved registers from context:
+ * r0, status register, r1 - r31
+ * -----------------------------------------------------------------------
+ *
+ * After the invocation of __context_restore() the pointer to task_func is
+ * on top of the stack and can be returned to. This way we can actually place
+ * it inside of the programm counter of the MCU.
+ */
 char *thread_arch_stack_init(void  (*task_func)(void), void *stack_start, int stack_size)
 {
 	uint16_t tmp_adress;
@@ -63,15 +80,13 @@ char *thread_arch_stack_init(void  (*task_func)(void), void *stack_start, int st
 	tmp_adress >>= 8;
 	*stk = (uint8_t) (tmp_adress & (uint16_t) 0x00ff);
 
-	/* save program counter */
+	/* save address to task_func in place of the program counter */
 	stk--;
 	tmp_adress = (uint16_t) task_func;
 	*stk = (uint8_t) (tmp_adress & (uint16_t) 0x00ff);
 	stk--;
 	tmp_adress >>= 8;
 	*stk = (uint8_t) (tmp_adress & (uint16_t) 0x00ff);
-//	stk--;
-//	*stk = 0;
 
 	/* r0 */
 	stk--;
@@ -81,14 +96,11 @@ char *thread_arch_stack_init(void  (*task_func)(void), void *stack_start, int st
 	stk--;
 	*stk = (uint8_t) SREG;
 
-	/* EIND and RAMPZ */
-//	stk--;
-//	*stk = (uint8_t) 0x00;
-//	stk--;
-//	*stk = (uint8_t) 0x00;
-
-
-	/* Space for registers r1 -r31 */
+	/*
+	 * Space for registers r1 -r31
+	 *
+	 * use loop for better readability, the compiler unrolls anyways
+	 */
 	int i;
 	for (i = 1; i<=32 ; i++) {
 		stk--;
@@ -99,6 +111,14 @@ char *thread_arch_stack_init(void  (*task_func)(void), void *stack_start, int st
 	return (char *) stk;
 }
 
+/**
+ * @brief thread_arch_stack_print prints the stack to stdout.
+ * It depends on getting the correct values for stack_start, stack_size and sp
+ * from sched_active_thread.
+ * Maybe it would be good to change that to way that is less dependant on
+ * getting correct values elsewhere (since it is a debugging tool and in the
+ * presence of bugs the data may be corrupted).
+ */
 void thread_arch_stack_print(void)
 {
 	char *base_pointer = (sched_active_thread->stack_start
@@ -125,17 +145,15 @@ void thread_arch_start_threading(void)
 	sched_run();
 	enableIRQ();
 	printf("Start Threading...\n");
-//	thread_arch_stack_print();
-	enter_thread_mode();
+	__enter_thread_mode();
 }
 
 /**
  * @brief Set the MCU into Thread-Mode and load the initial task from the stack and run it
  */
-void NORETURN enter_thread_mode(void)
+void NORETURN __enter_thread_mode(void)
 {
 	__context_restore();
-//	thread_arch_stack_print();
 	asm volatile ("ret");
 
 	UNREACHABLE();
@@ -145,7 +163,7 @@ void thread_arch_yield(void)
 {
 	__context_save();
 
-	disableIRQ(); // should still be deactivated
+//	disableIRQ(); // should still be deactivated
 	sched_run();
 	enableIRQ();
 
@@ -160,10 +178,6 @@ __attribute__((always_inline)) static inline void __context_save(void)
 				  "in   r0, __SREG__                   \n\t"
 				  "cli                                 \n\t"
 				  "push r0                             \n\t"
-//				  "in   r0, 0x3b                       \n\t"
-//				  "push r0                             \n\t"
-//				  "in   r0, 0x3c                       \n\t"
-//				  "push r0                             \n\t"
 				  "push r1                             \n\t"
 				  "clr  r1                             \n\t"
 				  "push r2                             \n\t"
@@ -247,10 +261,6 @@ __attribute__((always_inline)) static inline void __context_restore(void)
 				  "pop  r2                             \n\t"
 				  "pop  r1                             \n\t"
 				  "pop  r0                             \n\t"
-//				  "out  0x3c, r0                       \n\t"
-//				  "pop  r0                             \n\t"
-//				  "out  0x3b, r0                       \n\t"
-//				  "pop  r0                             \n\t"
 				  "out  __SREG__, r0                   \n\t"
 				  "pop  r0                             \n\t"
 	);
