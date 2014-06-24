@@ -60,15 +60,6 @@
 				      : "g" (X)               \
 				      : "r15","r16");         \
 })
-/**
- * @brief Macro has to be called in the beginning of each ISR
- */
-//#define ISR_ENTER()         asm("push {LR}")
-
-/**
- * @brief Macro has to be called on each exit of an ISR
- */
-//#define ISR_EXIT()          asm("pop {r0}"); asm("bx r0")
 
 /**
  * @brief Initialization of the CPU
