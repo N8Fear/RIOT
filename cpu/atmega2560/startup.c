@@ -84,7 +84,7 @@ void reset_handler(void)
  */
 void dummy_handler(void)
 {
-    //while (1) {asm ("nop");}
+    while (1) {asm ("nop");}
 	;
 }
 
