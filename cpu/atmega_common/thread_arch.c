@@ -163,7 +163,7 @@ void thread_arch_yield(void)
 {
 	__context_save();
 
-//	disableIRQ(); // should still be deactivated
+	/* disableIRQ(); */ /* gets already disabled during __context_save() */
 	sched_run();
 	enableIRQ();
 
@@ -174,7 +174,7 @@ void thread_arch_yield(void)
 __attribute__((always_inline)) static inline void __context_save(void)
 {
 	asm volatile (
-			      "push r0                             \n\t"
+				  "push r0                             \n\t"
 				  "in   r0, __SREG__                   \n\t"
 				  "cli                                 \n\t"
 				  "push r0                             \n\t"
@@ -210,12 +210,12 @@ __attribute__((always_inline)) static inline void __context_save(void)
 				  "push r29                            \n\t"
 				  "push r30                            \n\t"
 				  "push r31                            \n\t"
-				  "lds  r26, sched_active_thread	   \n\t"
+				  "lds  r26, sched_active_thread       \n\t"
 				  "lds  r27, sched_active_thread + 1   \n\t"
-				  "in   r0, __SP_L__				   \n\t"
-				  "st   x+, r0						   \n\t"
-				  "in   r0, __SP_H__				   \n\t"
-				  "st   x+, r0						   \n\t"
+				  "in   r0, __SP_L__                   \n\t"
+				  "st   x+, r0                         \n\t"
+				  "in   r0, __SP_H__                   \n\t"
+				  "st   x+, r0                         \n\t"
 	);
 
 }
@@ -223,12 +223,12 @@ __attribute__((always_inline)) static inline void __context_save(void)
 __attribute__((always_inline)) static inline void __context_restore(void)
 {
 	asm volatile (
-				  "lds  r26, sched_active_thread	   \n\t"
+				  "lds  r26, sched_active_thread       \n\t"
 				  "lds  r27, sched_active_thread + 1   \n\t"
-				  "ld   r28, x+						   \n\t"
-				  "out  __SP_L__, r28				   \n\t"
-				  "ld   r29, x+						   \n\t"
-				  "out  __SP_H__, r29				   \n\t"
+				  "ld   r28, x+                        \n\t"
+				  "out  __SP_L__, r28                  \n\t"
+				  "ld   r29, x+                        \n\t"
+				  "out  __SP_H__, r29                  \n\t"
 				  "pop  r31                            \n\t"
 				  "pop  r30                            \n\t"
 				  "pop  r29                            \n\t"
