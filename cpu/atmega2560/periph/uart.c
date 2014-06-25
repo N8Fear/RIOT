@@ -9,12 +9,13 @@
 /**
  * @ingroup     driver_periph
  * @{
- * 
+ *
  * @file        uart.c
  * @brief       Low-level UART driver implementation
  *
  * @author      Hauke Petersen <hauke.petersen@fu-berlin.de>
- * 
+ * @author		Hinnerk van Bruinehsen <h.v.bruinehsen@fu-berlin.de>
+ *
  * @}
  */
 
@@ -36,7 +37,7 @@ typedef struct {
 /**
  * @brief Allocate memory to store the callback functions.
  */
-//static uart_conf_t config[UART_NUMOF];
+static uart_conf_t config[UART_NUMOF];
 
 
 
@@ -44,12 +45,63 @@ typedef struct {
 
 int uart_init(uart_t uart, uint32_t baudrate, void (*rx_cb)(char), void (*tx_cb)(void))
 {
-    return 0;
+	/* initialize basic functionality */
+	int res = uart_init_blocking(uart, baudrate);
+	if (res != 0) {
+		return res;
+	}
+
+	/* register callbacks */
+	config[uart].rx_cb = rx_cb;
+	config[uart].tx_cb = tx_cb;
+
+	/* configure interrupts and enable RX interrupt */
+	switch (uart) {
+		case UART_0:
+			UCSR0B |= (1 << RXCIE0);
+		break;
+		case UART_UNDEFINED:
+			return -2;
+	}
+	return 0;
 }
 
 int uart_init_blocking(uart_t uart, uint32_t baudrate)
 {
-    return 0;
+	uint16_t clock_divider = F_CPU / (16 * baudrate);
+	switch (uart) {
+#if UART_0_EN
+		case UART_0:
+			/* enable RX and TX */
+			UCSR0B |= (1 << RXEN0) | (1 << TXEN0);
+			/* use 8 Bit characters */
+			UCSR0C |= (1 << UCSZ00) | (1 << UCSZ01);
+
+			/* set clock divider */
+			UBRR0L = clock_divider;
+			UBRR0H = (clock_divider >> 8);
+			break;
+#endif /* UART_0 */
+#if UART_1_EN
+		case UART_1:
+
+			break;
+#endif /* UART_1 */
+#if UART_2_EN
+		case UART_2:
+
+			break;
+#endif /* UART_2 */
+#if UART_3_EN
+		case UART_3:
+
+			break
+#endif /* UART_3 */
+		case UART_UNDEFINED:
+			return -2;
+			break;
+	}
+	return 0;
 }
 
 void uart_tx_begin(uart_t uart)
