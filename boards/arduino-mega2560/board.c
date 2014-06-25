@@ -26,21 +26,10 @@
 /* defines from extern project */
 #include <avr/io.h>
 #include <util/delay.h>
-#include <avr/interrupt.h>
+#include <periph/uart.h>
 
 #define USART_BAUDRATE 9600
 #define BAUD_PRESCALE ((F_CPU / (USART_BAUDRATE * 16UL)) - 1)
-
-void init_uart(void)
-{
-	UCSR0B |= (1 << RXEN0) | (1 << TXEN0); // turn on rx and tx
-	UCSR0C |= (1 << UCSZ00) | (1 << UCSZ01); // 8 Bit characters
-
-	UBRR0H = (BAUD_PRESCALE >> 8);
-	UBRR0L = BAUD_PRESCALE;
-
-	UCSR0B |= (1 << RXCIE0);
-}
 
 static int uart_putchar(unsigned char c, FILE *stream)
 {
@@ -52,10 +41,18 @@ static int uart_putchar(unsigned char c, FILE *stream)
 	return 0;
 }
 
+/*
+char uart_getchar(FILE *stream) {
+	while (( UCSR0A & (1 << RXC0 )) == 0) {};
+    return UDR0;
+}
+*/
+
 void led_init(void);
 
 /* prototypes from extern project */
 static FILE mystdout = FDEV_SETUP_STREAM(uart_putchar, NULL, _FDEV_SETUP_WRITE);
+/* static FILE mystin = FDEV_SETUP_STREAM(NULL, uart_getchar, _FDEV_SETUP_READ);*/
 
 /*prototypes: end */
 
@@ -70,14 +67,15 @@ void board_init(void)
     /* initialize the boards LEDs */
     led_init();
 
-	/* hardcoded UART stuff from extern project */
-	init_uart();
-	/* Global interrupts enable */
-	sei();
+	/* initialize UART_0 for use as stdout */
+	uart_init_blocking(UART_0, 38400);
+	UCSR0B |= (1 << RXCIE0);
+	enableIRQ();
 
 	stdout=&mystdout;
+/*	stdin =&mystin; */
 	/* Flush stdout */
-	puts("\r");
+	puts("\f");
 }
 
 
