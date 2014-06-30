@@ -13,6 +13,7 @@
  * @file        io_arch.c
  * @brief       Implementation of the kernel's architecture dependent IO interface
  *
+ * @author      Hauke Petersen <hauke.petersen@fu-berlin.de>
  * @author      Hinnerk van Bruinehsen <h.v.bruinehsen@fu-berlin.de>
  *
  * @}
@@ -24,6 +25,9 @@
 
 int io_arch_puts(char *data, int size)
 {
-	//TODO: add actual implementation
-	return 6;
+    int i = 0;
+    for (; i < size; i++) {
+        putchar(data[i]);
+    }
+    return i;
 }
