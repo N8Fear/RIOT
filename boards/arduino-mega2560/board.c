@@ -19,46 +19,27 @@
  */
 
 #include <stdio.h>
+#include <avr/io.h>
 
 #include "board.h"
 #include "cpu.h"
+#include "periph/uart.h"
 
-/* defines from extern project */
-#include <avr/io.h>
-#include <util/delay.h>
-#include <periph/uart.h>
-
-#define USART_BAUDRATE 9600
-#define BAUD_PRESCALE ((F_CPU / (USART_BAUDRATE * 16UL)) - 1)
-
-static int uart_putchar(unsigned char c, FILE *stream)
-{
-	if (c == '\n')
-			uart_putchar('\r', stream);
-    uart_write_blocking(UART_0, c);
-	return 0;
-}
-
-/*
-char uart_getchar(FILE *stream) {
-	char temp;
-	uart_read_blocking(UART_0, &temp);
-    return temp;
-}
-*/
 
 void led_init(void);
+void SystemInit(void);
+static int uart_putchar(unsigned char c, FILE *stream);
+static char uart_getchar(FILE *stream);
 
-/* prototypes from extern project */
 static FILE mystdout = FDEV_SETUP_STREAM(uart_putchar, NULL, _FDEV_SETUP_WRITE);
-/* static FILE mystin = FDEV_SETUP_STREAM(NULL, uart_getchar, _FDEV_SETUP_READ);*/
+static FILE mystin = FDEV_SETUP_STREAM(NULL, uart_getchar, _FDEV_SETUP_READ);
 
-/*prototypes: end */
+
 
 void board_init(void)
 {
-    /* initialize core clocks via CMSIS function provided by Atmel */
-//    SystemInit();
+    /* initialize stdio via USART_0 */
+    SystemInit();
 
     /* initialize the CPU */
     cpu_init();
@@ -66,15 +47,7 @@ void board_init(void)
     /* initialize the boards LEDs */
     led_init();
 
-	/* initialize UART_0 for use as stdout */
-	uart_init_blocking(UART_0, 38400);
-	UCSR0B |= (1 << RXCIE0);
 	enableIRQ();
-
-	stdout=&mystdout;
-/*	stdin =&mystin; */
-	/* Flush stdout */
-	puts("\f");
 }
 
 
@@ -102,4 +75,34 @@ void led_init(void)
 //    LED_PORT->PIO_PUDR = LED_PIN;
 //    /* clear pin */
 //    LED_PORT->PIO_CODR = LED_PIN;
+}
+
+
+/**
+ * @brief Initialize the System, initialize IO via UART_0
+ */
+void SystemInit(void)
+{
+	/* initialize UART_0 for use as stdout */
+	uart_init_blocking(UART_0, 38400);
+
+	stdout=&mystdout;
+	stdin =&mystin;
+
+	/* Flush stdout */
+	puts("\f");
+}
+
+static int uart_putchar(unsigned char c, FILE *stream)
+{
+	if (c == '\n')
+			uart_putchar('\r', stream);
+    uart_write_blocking(UART_0, c);
+	return 0;
+}
+
+char uart_getchar(FILE *stream) {
+	char temp;
+	uart_read_blocking(UART_0, &temp);
+    return temp;
 }
