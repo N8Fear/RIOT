@@ -60,7 +60,6 @@
 #define UART_1_EN           0
 #define UART_2_EN           0
 #define UART_3_EN           0
-#define UART_IRQ_PRIO       1
 
 /* UART 0 device configuration */
 #define UART_0_DEV          UART
