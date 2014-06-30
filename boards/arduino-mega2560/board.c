@@ -35,16 +35,15 @@ static int uart_putchar(unsigned char c, FILE *stream)
 {
 	if (c == '\n')
 			uart_putchar('\r', stream);
-	while ( !(UCSR0A & (1 << UDRE0)) )
-		;
-	UDR0 = c;
+    uart_write_blocking(UART_0, c);
 	return 0;
 }
 
 /*
 char uart_getchar(FILE *stream) {
-	while (( UCSR0A & (1 << RXC0 )) == 0) {};
-    return UDR0;
+	char temp;
+	uart_read_blocking(UART_0, &temp);
+    return temp;
 }
 */
 
