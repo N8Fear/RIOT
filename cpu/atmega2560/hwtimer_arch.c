@@ -54,7 +54,7 @@ void hwtimer_arch_set(unsigned long offset, short timer)
 
 void hwtimer_arch_set_absolute(unsigned long value, short timer)
 {
-    /* DEPRECATED?! - will not be implemented */
+    /* DEPRECATED?!- will not be implemented */
 }
 
 void hwtimer_arch_unset(short timer)

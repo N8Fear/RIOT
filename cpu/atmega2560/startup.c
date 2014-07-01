@@ -51,12 +51,12 @@ void init8_ovr(void) __attribute__((naked)) __attribute__((section(".init8")));
 
 void init7_ovr(void)
 {
-	asm("call reset_handler");
+    asm("call reset_handler");
 }
 
 void init8_ovr(void)
 {
-	asm("jmp exit");
+    asm("jmp exit");
 }
 /**
  * @brief This function is the entry point after a system reset
@@ -74,7 +74,7 @@ void reset_handler(void)
     /* initialize the board and startup the kernel */
     board_init();
     /* initialize std-c library (this should be done after board_init) */
-/*   __libc_init_array(); // seems unnecessary for avr-libc */
+    /*   __libc_init_array(); // seems unnecessary for avr-libc */
     /* startup the kernel */
     kernel_init();
 }
@@ -84,15 +84,18 @@ void reset_handler(void)
  */
 void dummy_handler(void)
 {
-    while (1) {asm ("nop");}
-	;
+    while (1) {
+        asm("nop");
+    }
+
+    ;
 }
 
 ISR(USART0_RX_vect, ISR_BLOCK)
 {
-	char rec_byte;
-	rec_byte = UDR0;
-	UDR0 = rec_byte;
+    char rec_byte;
+    rec_byte = UDR0;
+    UDR0 = rec_byte;
 }
 
 /* interrupt handlers for manual Interrupt Vector Table
