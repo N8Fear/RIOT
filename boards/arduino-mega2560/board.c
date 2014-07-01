@@ -47,7 +47,7 @@ void board_init(void)
     /* initialize the boards LEDs */
     led_init();
 
-	enableIRQ();
+    enableIRQ();
 }
 
 
@@ -62,19 +62,19 @@ void board_init(void)
  */
 void led_init(void)
 {
-	DDRB = 0xFF;
-	DDRH = 0xFF;
-	DDRE = 0xFF;
-//    /* enable PIO control of pin PD27 */
-//    LED_PORT->PIO_PER = LED_PIN;
-//    /* set pin as output */
-//    LED_PORT->PIO_OER = LED_PIN;
-//    /* enable direct write access to the LED pin */
-//    LED_PORT->PIO_OWER = LED_PIN;
-//    /* disable pull-up */
-//    LED_PORT->PIO_PUDR = LED_PIN;
-//    /* clear pin */
-//    LED_PORT->PIO_CODR = LED_PIN;
+    DDRB = 0xFF;
+    DDRH = 0xFF;
+    DDRE = 0xFF;
+    //    /* enable PIO control of pin PD27 */
+    //    LED_PORT->PIO_PER = LED_PIN;
+    //    /* set pin as output */
+    //    LED_PORT->PIO_OER = LED_PIN;
+    //    /* enable direct write access to the LED pin */
+    //    LED_PORT->PIO_OWER = LED_PIN;
+    //    /* disable pull-up */
+    //    LED_PORT->PIO_PUDR = LED_PIN;
+    //    /* clear pin */
+    //    LED_PORT->PIO_CODR = LED_PIN;
 }
 
 
@@ -83,26 +83,29 @@ void led_init(void)
  */
 void SystemInit(void)
 {
-	/* initialize UART_0 for use as stdout */
-	uart_init_blocking(UART_0, 38400);
+    /* initialize UART_0 for use as stdout */
+    uart_init_blocking(UART_0, 38400);
 
-	stdout=&mystdout;
-	stdin =&mystin;
+    stdout = &mystdout;
+    stdin = &mystin;
 
-	/* Flush stdout */
-	puts("\f");
+    /* Flush stdout */
+    puts("\f");
 }
 
 static int uart_putchar(unsigned char c, FILE *stream)
 {
-	if (c == '\n')
-			uart_putchar('\r', stream);
+    if (c == '\n') {
+        uart_putchar('\r', stream);
+    }
+
     uart_write_blocking(UART_0, c);
-	return 0;
+    return 0;
 }
 
-char uart_getchar(FILE *stream) {
-	char temp;
-	uart_read_blocking(UART_0, &temp);
+char uart_getchar(FILE *stream)
+{
+    char temp;
+    uart_read_blocking(UART_0, &temp);
     return temp;
 }
