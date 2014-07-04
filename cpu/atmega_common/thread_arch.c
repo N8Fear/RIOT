@@ -80,6 +80,10 @@ char *thread_arch_stack_init(void (*task_func)(void), void *stack_start, int sta
     tmp_adress >>= 8;
     *stk = (uint8_t)(tmp_adress & (uint16_t) 0x00ff);
 
+	/* Garbage to align address of sched_task_exit to get popped into PC */
+    stk--;
+    *stk = (uint8_t) 0xEE;
+
     /* save address to task_func in place of the program counter */
     stk--;
     tmp_adress = (uint16_t) task_func;
