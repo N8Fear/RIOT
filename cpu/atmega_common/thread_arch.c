@@ -149,25 +149,28 @@ void thread_arch_stack_print(void)
     printf("\n=======Stack of %s:end=======\n", sched_active_thread->name);
 }
 
+void thread_arch_start_threading(void) __attribute__ ((naked));
 void thread_arch_start_threading(void)
 {
     sched_run();
-    enableIRQ();
-    printf("Start Threading...\n");
     __enter_thread_mode();
 }
 
 /**
  * @brief Set the MCU into Thread-Mode and load the initial task from the stack and run it
  */
+
+void NORETURN __enter_thread_mode(void) __attribute__ ((naked));
 void NORETURN __enter_thread_mode(void)
 {
+    enableIRQ();
     __context_restore();
     asm volatile("ret");
 
     UNREACHABLE();
 }
 
+void thread_arch_yield(void) __attribute__ ((naked));
 void thread_arch_yield(void)
 {
     __context_save();
@@ -177,6 +180,7 @@ void thread_arch_yield(void)
     enableIRQ();
 
     __context_restore();
+    asm volatile("ret");
 }
 
 
