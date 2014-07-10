@@ -3,38 +3,3 @@
  * @brief       AVR Atmega specific code
  * @ingroup     cpu
  */
-
-/**
- * @defgroup    CMSIS_Core_FunctionInterface
- * @ingroup     atmega
- */
-
-/**
- * @defgroup    CMSIS_core_register
- * @ingroup     atmega
- */
-
-/**
- * @defgroup    CMSIS_glob_defs
- * @ingroup     atmega
- */
-
-/**
- * @defgroup    CMSIS_MISRA_Exceptions
- * @ingroup     atmega
- */
-
-/**
- * @defgroup    CMSIS_core_definitions
- * @ingroup     atmega
- */
-
-/**
- * @defgroup    CMSIS_SIMD_intrinsics
- * @ingroup     atmega
- */
-
-/**
- * @defgroup    CMSIS_Core_InstructionInterface
- * @ingroup     atmega
- */

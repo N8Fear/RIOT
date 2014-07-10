@@ -28,10 +28,9 @@
  */
 unsigned int irq_arch_disable(void)
 {
-    /* TODO: check if 32 bit is necessary here */
-    uint32_t mask = __get_interrupt_state();
+    uint8_t mask = __get_interrupt_state();
     cli();
-    return mask;
+    return (unsigned int) mask;
 }
 
 /**
@@ -56,6 +55,9 @@ void irq_arch_restore(unsigned int state)
  */
 int irq_arch_in(void)
 {
-    //TODO: find a way to implement this function
+    /*
+     * TODO: find a way to implement this function (e.g. a static variable dis- or
+     * set and unset in each ISR)
+     */
     return 0;
 }
