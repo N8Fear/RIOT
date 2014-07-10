@@ -26,13 +26,13 @@
  * TODO: measure and adjust for the atmega2560
  * @{
  */
-#define KERNEL_CONF_STACKSIZE_PRINTF    (1000)
+#define KERNEL_CONF_STACKSIZE_PRINTF    (512)
 
 #ifndef KERNEL_CONF_STACKSIZE_DEFAULT
-#define KERNEL_CONF_STACKSIZE_DEFAULT   (1000)
+#define KERNEL_CONF_STACKSIZE_DEFAULT   (512)
 #endif
 
-#define KERNEL_CONF_STACKSIZE_IDLE      (512)
+#define KERNEL_CONF_STACKSIZE_IDLE      (64)
 /** @} */
 
 /**

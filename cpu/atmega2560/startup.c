@@ -62,19 +62,14 @@ void init8_ovr(void)
  * @brief This function is the entry point after a system reset
  *
  * After a system reset, the following steps are necessary and carried out:
- * 1. load data section from flash to ram
- * 2. overwrite uninitialized data section (BSS) with zeros
- * 3. initialize the newlib
- * 4. initialize the board (sync clock, setup std-IO)
- * 5. initialize and start RIOTs kernel
+ * 1. initialize the board (sync clock, setup std-IO)
+ * 2. initialize and start RIOTs kernel
  */
 
 void reset_handler(void)
 {
     /* initialize the board and startup the kernel */
     board_init();
-    /* initialize std-c library (this should be done after board_init) */
-    /*   __libc_init_array(); // seems unnecessary for avr-libc */
     /* startup the kernel */
     kernel_init();
 }
@@ -93,11 +88,31 @@ void dummy_handler(void)
 
 ISR(USART0_RX_vect, ISR_BLOCK)
 {
+	/*
+	 * TODO: implement interrupt based input
+	 *
+	 * Idea: Use Ringbuffer for input, two pointers:
+	 * 1. Pointer where to insert data
+	 * 2. Pointer where to get data from
+	 *
+	 * if pointer_1++ == pointer_2 -> buffer full
+	 */
     char rec_byte;
     rec_byte = UDR0;
     UDR0 = rec_byte;
 }
 
+
+/*
+ * TODO: check possibility to move from avr-libc specific interrupt
+ * implementation.
+ * This would provide the option to change to another libc if required/wanted.
+ * Steps:
+ * Change from avr-libc style macros to either the actual implementation after
+ * preprocessing or move the macro definition to a local header file.
+ * It may be required to generate a custom linker file due to the fact that
+ * avr-libc seems to hardcode quite a few things there
+ */
 /* interrupt handlers for manual Interrupt Vector Table
 void int0_isr(void)                 __attribute__ ((weak, alias("dummy_handler")));
 void int1_isr(void)                 __attribute__ ((weak, alias("dummy_handler")));

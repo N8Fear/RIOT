@@ -7,7 +7,7 @@ DIRS = periph
 
 .PHONY: all $(ATMEGA_COMMON)
 
-# when building the CPU module make sure, the STM std peripheral lib will also be build
+# when building the CPU module make sure, the std peripheral lib will also be build
 all: $(ATMEGA_COMMON) $(BINDIR)$(MODULE).a
 	@for i in $(DIRS) ; do $(MAKE) -C $$i ; done ;
 

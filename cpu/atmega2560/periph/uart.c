@@ -39,10 +39,6 @@ typedef struct {
  */
 static uart_conf_t config[UART_NUMOF];
 
-
-
-
-
 int uart_init(uart_t uart, uint32_t baudrate, void (*rx_cb)(char), void (*tx_cb)(void))
 {
     /* initialize basic functionality */

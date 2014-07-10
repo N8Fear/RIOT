@@ -19,6 +19,7 @@
  */
 
 #include <stdio.h>
+#include <avr/wdt.h>
 
 #include "arch/reboot_arch.h"
 #include "cpu.h"
@@ -27,6 +28,13 @@
 int reboot_arch(int mode)
 {
     printf("Going into reboot, mode %i\n", mode);
+
+	/*
+	 * Since the AVR doesn't support a real software reset, we set the Watchdog
+	 * Timer on a 250ms timeout. Consider this a kludge.
+	 */
+	wdt_enable(WDTO_250MS);
+
 
     return 0;
 }

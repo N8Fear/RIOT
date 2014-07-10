@@ -15,6 +15,7 @@
  *
  * @author      Stefan Pfeiffer <stefan.pfeiffer@fu-berlin.de>
  * @author      Hauke Petersen <hauke.petersen@fu-berlin.de>
+ * @author      Hinnerk van Bruinehsen <h.v.bruinehsen@fu-berlin.de>
  *
  * @}
  */
