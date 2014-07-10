@@ -18,11 +18,11 @@ ifeq ($(OS),Linux)
   PORT ?= /dev/ttyACM0
   FLASHER = avrdude
 #else ifeq ($(OS),Darwin)
-#  PORT ?= $(shell ls -1 /dev/tty.usbmodem* | head -n 1)
-#  FLASHER = stty -f $(PORT) raw ispeed 1200 ospeed 1200 cs8 -cstopb ignpar eol 255 eof 255; $(RIOTBOARD)/$(BOARD)/dist/bossac_osx
+#  PORT ?=
+#  FLASHER =
 else
   $(info CAUTION: No flash tool for your host system found!)
-  # TODO: fix for building under windows
+  # TODO: fix for building under windows/MacOS
 endif
 export FLASHER
 export PORT
@@ -36,14 +36,7 @@ export LINKFLAGS += -g3 -ggdb -std=gnu99 $(CPU_USAGE) $(FPU_USAGE) -static -lgcc
 # linkerscript specified in cpu/Makefile.include
 #export LINKFLAGS += -T$(LINKERSCRIPT)
 export OFLAGS += -j .text -j .data -O ihex
-#export FFLAGS += -j .text -j .data -O ihex bin/$(BOARD)/$(PROJECT).elf bin/$(BOARD)/$(PROJECT).hex
 export FFLAGS += -p m2560 -c stk500v2 -P $(PORT) -b 115200 -F -U flash:w:bin/$(BOARD)/$(PROJECT)$(APPLICATION).hex
-
-# additional compiler and linker flags to enable newlib-nano and optimize for it
-# CAREFUL: newlib-nano is not supported by the ubuntu arm-none-eabi- toolchain, so its disabled by default
-#export CFLAGS += -flto -ffunction-sections -fdata-sections -fno-builtin
-#export LINKFLAGS += -specs=nano.specs -lc -lnosys
-
 
 # export board specific includes to the global includes-listing
 export INCLUDES += -I$(RIOTBOARD)/$(BOARD)/include

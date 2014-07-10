@@ -41,20 +41,20 @@
  * @brief Macro returns state of the global interrupt register
  */
 #define __get_interrupt_state() ({            \
-        unsigned char sreg;                   \
+        uint8_t sreg;                         \
         asm volatile ("in r0, __SREG__; \n\t" \
                       "mov %0, r0"            \
                       : "=g" (sreg)           \
 					  :	                      \
 		              : "r0");                \
-        sreg&(1<<7);                          \
+        sreg & (1<<7);                        \
 })
 
 #define __set_interrupt_state(X) ({           \
 	    asm volatile ("mov r15,%0;       \n\t"\
 				      "in r16, __SREG__; \n\t"\
-					  "cbr r16,7;        \n\t"\
-				      "and r15,r16;      \n\t"\
+				      "cbr r16,7;        \n\t"\
+				      "or r15,r16;      \n\t"\
 				      "out __SREG__, r15 \n\t"\
 				      :                       \
 				      : "g" (X)               \

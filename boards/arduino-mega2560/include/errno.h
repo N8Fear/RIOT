@@ -12,8 +12,10 @@
  * @brief       Board specific files for the Arduino Mega 2560 board.
  * @{
  *
- * @file        board.h
- * @brief       Board specific definitions for the Arduino Mega 2560 board.
+ * @file        errno.h
+ * @brief       Since avr-libc doesn't provide an errno header we define the
+ * necessary values ourself. The numbers are taken from the errno.h from
+ * the linux headers.
  *
  * @author      Hinnerk van Bruinehsen <h.v.bruinehsen@fu-berlin.de>
  */

@@ -9,15 +9,14 @@ export USEMODULE += atmega_common
 export ATMEGA_COMMON = $(RIOTCPU)/atmega_common/
 
 # define the linker script to use for this CPU
-#export LINKERSCRIPT = $(RIOTCPU)/$(CPU)/sam3x8e_linkerscript.ld
+#export LINKERSCRIPT = $(RIOTCPU)/$(CPU)/atmega2560_linkerscript.ld
 
 # include CPU specific includes
 export INCLUDES += -I$(RIOTCPU)/$(CPU)/include
 
 # explicitly tell the linker to link the syscalls and startup code.
 #   Without this the interrupt vectors will not be linked correctly!
-#export UNDEF += $(BINDIR)cpu/syscalls.o
-#export UNDEF += $(BINDIR)cpu/startup.o
+export UNDEF += $(BINDIR)cpu/startup.o
 
 # export the peripheral drivers to be linked into the final binary
 export USEMODULE += periph

@@ -24,5 +24,6 @@
  */
 void cpu_init(void)
 {
+    /* Right now we need to do nothing here */
     ;
 }
