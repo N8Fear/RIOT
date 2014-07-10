@@ -89,7 +89,7 @@ char *thread_arch_stack_init(void *(*task_func)(void *), void *arg, void *stack_
     *stk = (uint8_t)(tmp_adress & (uint16_t) 0x00ff);
 
 #if defined(__AVR_ATmega2560__)
-	/* The ATMega2560 uses a 17 byte PC, we set the top byte forcibly to 0 */
+    /* The ATMega2560 uses a 17 byte PC, we set the top byte forcibly to 0 */
     stk--;
     *stk = (uint8_t) 0x00;
 #endif
@@ -103,7 +103,7 @@ char *thread_arch_stack_init(void *(*task_func)(void *), void *arg, void *stack_
     *stk = (uint8_t)(tmp_adress & (uint16_t) 0x00ff);
 
 #if defined(__AVR_ATmega2560__)
-	/* The ATMega2560 uses a 17 byte PC, we set the top byte forcibly to 0 */
+    /* The ATMega2560 uses a 17 byte PC, we set the top byte forcibly to 0 */
     stk--;
     *stk = (uint8_t) 0x00;
 #endif
@@ -118,11 +118,11 @@ char *thread_arch_stack_init(void *(*task_func)(void *), void *arg, void *stack_
     *stk = (uint8_t) 0x80;
 
 #if defined(__AVR_ATmega2560__)
-	/* EIND */
+    /* EIND */
     stk--;
     *stk = (uint8_t) 0x00;
 
-	/* RAMPZ */
+    /* RAMPZ */
     stk--;
     *stk = (uint8_t) 0x00;
 #endif
@@ -139,24 +139,24 @@ char *thread_arch_stack_init(void *(*task_func)(void *), void *arg, void *stack_
         *stk = (uint8_t) i;
     }
 
-	/*
-	 * In accordance with the AVR calling conventions *arg has to be inside
-	 * r24 and r25
-	 * */
-	stk--;
-	tmp_adress = (uint16_t) arg;
-	*stk = (uint8_t) (tmp_adress & (uint16_t) 0x00ff);
-	stk--;
-	tmp_adress >>= 8;
-	*stk = (uint8_t) (tmp_adress & (uint16_t) 0x00ff);
+    /*
+     * In accordance with the AVR calling conventions *arg has to be inside
+     * r24 and r25
+     * */
+    stk--;
+    tmp_adress = (uint16_t) arg;
+    *stk = (uint8_t)(tmp_adress & (uint16_t) 0x00ff);
+    stk--;
+    tmp_adress >>= 8;
+    *stk = (uint8_t)(tmp_adress & (uint16_t) 0x00ff);
 
-	/*
-	 * Space for registers r26-r31
-	 */
-	for (i = 26; i <=31; i++) {
-		stk--;
-		*stk = (uint8_t) i;
-	}
+    /*
+     * Space for registers r26-r31
+     */
+    for (i = 26; i <= 31; i++) {
+        stk--;
+        *stk = (uint8_t) i;
+    }
 
     stk--;
     return (char *) stk;
@@ -195,7 +195,7 @@ void thread_arch_stack_print(void)
     printf("\n=======Stack of %s:end=======\n", sched_active_thread->name);
 }
 
-void thread_arch_start_threading(void) __attribute__ ((naked));
+void thread_arch_start_threading(void) __attribute__((naked));
 void thread_arch_start_threading(void)
 {
     sched_run();
@@ -206,7 +206,7 @@ void thread_arch_start_threading(void)
  * @brief Set the MCU into Thread-Mode and load the initial task from the stack and run it
  */
 
-void NORETURN __enter_thread_mode(void) __attribute__ ((naked));
+void NORETURN __enter_thread_mode(void) __attribute__((naked));
 void NORETURN __enter_thread_mode(void)
 {
     enableIRQ();
@@ -216,7 +216,7 @@ void NORETURN __enter_thread_mode(void)
     UNREACHABLE();
 }
 
-void thread_arch_yield(void) __attribute__ ((naked));
+void thread_arch_yield(void) __attribute__((naked));
 void thread_arch_yield(void)
 {
     __context_save();
@@ -238,7 +238,7 @@ __attribute__((always_inline)) static inline void __context_save(void)
         "cli                                 \n\t"
         "push r0                             \n\t"
 #if defined(__AVR_ATmega2560__)
-		/* EIND and RAMPZ */
+        /* EIND and RAMPZ */
         "in     r0, 0x3b                     \n\t"
         "push   r0                           \n\t"
         "in     r0, 0x3c                     \n\t"
@@ -327,7 +327,7 @@ __attribute__((always_inline)) static inline void __context_restore(void)
         "pop  r2                             \n\t"
         "pop  r1                             \n\t"
 #if defined(__AVR_ATmega2560__)
-		/* EIND and RAMPZ */
+        /* EIND and RAMPZ */
         "pop    r0                           \n\t"
         "out    0x3c, r0                     \n\t"
         "pop    r0                           \n\t"
