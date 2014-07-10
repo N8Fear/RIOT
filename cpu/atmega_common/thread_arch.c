@@ -44,21 +44,29 @@ static void __enter_thread_mode(void);
  * a marker (AFFE) - for debugging purposes (helps finding the stack
  * -----------------------------------------------------------------------
  * a 16 Bit pointer to sched_task_exit
+ * (Optional 17 bit (bit is set to zero) for ATmega2560
  * -----------------------------------------------------------------------
  * a 16 Bit pointer to task_func
  * this is placed exactly at the place where the program counter would be
  * stored normally and thus can be returned to when __context_restore()
  * has been run
+ * (Optional 17 bit (bit is set to zero) for ATmega2560
  * -----------------------------------------------------------------------
  * saved registers from context:
- * r0, status register, r1 - r31
+ * r0
+ * status register
+ * (Optional EIND and RAMPZ registers for ATmega2560)
+ * r1 - r23
+ * pointer to arg in r24 and r25
+ * r26 - r31
  * -----------------------------------------------------------------------
  *
  * After the invocation of __context_restore() the pointer to task_func is
  * on top of the stack and can be returned to. This way we can actually place
  * it inside of the programm counter of the MCU.
+ * if task_func returns sched_task_exit gets popped into the PC
  */
-char *thread_arch_stack_init(void (*task_func)(void), void *stack_start, int stack_size)
+char *thread_arch_stack_init(void *(*task_func)(void *), void *arg, void *stack_start, int stack_size)
 {
     uint16_t tmp_adress;
     uint8_t *stk;
@@ -80,9 +88,11 @@ char *thread_arch_stack_init(void (*task_func)(void), void *stack_start, int sta
     tmp_adress >>= 8;
     *stk = (uint8_t)(tmp_adress & (uint16_t) 0x00ff);
 
-	/* Garbage to align address of sched_task_exit to get popped into PC */
+#if defined(__AVR_ATmega2560__)
+	/* The ATMega2560 uses a 17 byte PC, we set the top byte forcibly to 0 */
     stk--;
-    *stk = (uint8_t) 0xEE;
+    *stk = (uint8_t) 0x00;
+#endif
 
     /* save address to task_func in place of the program counter */
     stk--;
@@ -92,25 +102,61 @@ char *thread_arch_stack_init(void (*task_func)(void), void *stack_start, int sta
     tmp_adress >>= 8;
     *stk = (uint8_t)(tmp_adress & (uint16_t) 0x00ff);
 
+#if defined(__AVR_ATmega2560__)
+	/* The ATMega2560 uses a 17 byte PC, we set the top byte forcibly to 0 */
+    stk--;
+    *stk = (uint8_t) 0x00;
+#endif
+
+
     /* r0 */
     stk--;
     *stk = (uint8_t) 0x00;
 
-    /* status register */
+    /* status register (with interrupts enabled) */
     stk--;
-    *stk = (uint8_t) SREG;
+    *stk = (uint8_t) 0x80;
+
+#if defined(__AVR_ATmega2560__)
+	/* EIND */
+    stk--;
+    *stk = (uint8_t) 0x00;
+
+	/* RAMPZ */
+    stk--;
+    *stk = (uint8_t) 0x00;
+#endif
 
     /*
-     * Space for registers r1 -r31
+     * Space for registers r1 -r23
      *
      * use loop for better readability, the compiler unrolls anyways
      */
     int i;
 
-    for (i = 1; i <= 32 ; i++) {
+    for (i = 1; i <= 23 ; i++) {
         stk--;
         *stk = (uint8_t) i;
     }
+
+	/*
+	 * In accordance with the AVR calling conventions *arg has to be inside
+	 * r24 and r25
+	 * */
+	stk--;
+	tmp_adress = (uint16_t) arg;
+	*stk = (uint8_t) (tmp_adress & (uint16_t) 0x00ff);
+	stk--;
+	tmp_adress >>= 8;
+	*stk = (uint8_t) (tmp_adress & (uint16_t) 0x00ff);
+
+	/*
+	 * Space for registers r26-r31
+	 */
+	for (i = 26; i <=31; i++) {
+		stk--;
+		*stk = (uint8_t) i;
+	}
 
     stk--;
     return (char *) stk;
@@ -191,6 +237,13 @@ __attribute__((always_inline)) static inline void __context_save(void)
         "in   r0, __SREG__                   \n\t"
         "cli                                 \n\t"
         "push r0                             \n\t"
+#if defined(__AVR_ATmega2560__)
+		/* EIND and RAMPZ */
+        "in     r0, 0x3b                     \n\t"
+        "push   r0                           \n\t"
+        "in     r0, 0x3c                     \n\t"
+        "push   r0                           \n\t"
+#endif
         "push r1                             \n\t"
         "clr  r1                             \n\t"
         "push r2                             \n\t"
@@ -273,6 +326,13 @@ __attribute__((always_inline)) static inline void __context_restore(void)
         "pop  r3                             \n\t"
         "pop  r2                             \n\t"
         "pop  r1                             \n\t"
+#if defined(__AVR_ATmega2560__)
+		/* EIND and RAMPZ */
+        "pop    r0                           \n\t"
+        "out    0x3c, r0                     \n\t"
+        "pop    r0                           \n\t"
+        "out    0x3b, r0                     \n\t"
+#endif
         "pop  r0                             \n\t"
         "out  __SREG__, r0                   \n\t"
         "pop  r0                             \n\t"
