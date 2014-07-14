@@ -57,10 +57,6 @@ timer_conf_t config[TIMER_NUMOF];
  */
 int timer_init(tim_t dev, unsigned int ticks_per_us, void (*callback)(int))
 {
-    //Tc *tim;
-    /* TODO: correctlyuse ticks_per_us
-     */
-
     /* select the timer and enable the timer specific peripheral clocks */
     switch (dev) {
 #if TIMER_0_EN
@@ -419,10 +415,28 @@ void timer_reset(tim_t dev)
 
 #if TIMER_0_EN
 /* TODO: implement channel logic */
+// LIKELY different ISRs for channels (compa, compb, compc)
 ISR(TIMER1_COMPA_vect, ISR_BLOCK)
 {
+    TCNT1 = 0; // reset timer
+    // clear interrupt status register / interrupt flag
     PORTB ^= (1 << 7);
-    //	config[TIMER_0].cb(1);
+    //if  (interrupt & COMPA)
+    // config[timer0].cb(0)
+    //if i(interrupt &COMPB)
+    //
+    // config[timer0].cb(1)
+    //
+    //if (interrupt & COMPC)
+//    config[TIMER_0].cb(0);
+}
+ISR(TIMER1_COMPB_vect, ISR_BLOCK)
+{
+    ;
+}
+ISR(TIMER1_COMPC_vect, ISR_BLOCK)
+{
+    ;
 }
 #endif /* TIMER_0_EN */
 
