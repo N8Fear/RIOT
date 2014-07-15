@@ -2,6 +2,9 @@
 APPLICATION = test_pthread_barrier
 include ../Makefile.tests_common
 
+BOARD_BLACKLIST := arduino-mega2560
+# arduino-mega2560: time.h missing from avr-libc
+
 ## Modules to include.
 USEMODULE += pthread
 USEMODULE += random
