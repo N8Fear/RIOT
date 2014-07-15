@@ -22,6 +22,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#include <avr/interrupt.h>
+
 #include "board.h"
 #include "cpu.h"
 
@@ -30,7 +32,8 @@
 
 /* TODO: for debugging: remove me: */
 #include <avr/io.h>
-#include <avr/interrupt.h>
+
+static inline int  __set_timer(tim_t dev, int channel, unsigned int timeout);
 
 typedef struct {
     void (*cb)(int);
@@ -44,7 +47,7 @@ timer_conf_t config[TIMER_NUMOF];
 /**
  * @brief Setup the given timer
  *
- * The ATmega2560 has 5 timers. Timer0 and Timer2 are 8 Bit Timers, Timer0 has
+ * The ATmega2560 has 6 timers. Timer0 and Timer2 are 8 Bit Timers, Timer0 has
  * special uses too and therefore we'll avoid using it. Timer5 has special uses
  * with certain Arduino Shields, too. Therefore we'll also avoid using Timer5.
  *
@@ -54,6 +57,9 @@ timer_conf_t config[TIMER_NUMOF];
  * Timer1 -> TIMER_0
  * Timer3 -> TIMER_1
  * Timer4 -> TIMER_2
+ *
+ * TODO: move this mapping to the header file to make the actual source device
+ * agnostic (when done should make possible to move this to atmega_common)
  */
 int timer_init(tim_t dev, unsigned int ticks_per_us, void (*callback)(int))
 {
@@ -115,129 +121,88 @@ int timer_init(tim_t dev, unsigned int ticks_per_us, void (*callback)(int))
 
 int timer_set(tim_t dev, int channel, unsigned int timeout)
 {
-    //    Tc *tim;
+    return __set_timer(dev, channel, timer_read(dev) + timeout);
+}
 
-    /* TODO: check how channels can be used/implemented */
-
-    /* get timer base register address */
-    switch (dev) {
-#if TIMER_0_EN
-
-        case TIMER_0:
-            //            tim = TIMER_0_DEV;
-            break;
-#endif
-#if TIMER_1_EN
-
-        case TIMER_1:
-            //            tim = TIMER_1_DEV;
-            //            break;
-#endif
-#if TIMER_2_EN
-        case TIMER_2:
-            //            tim = TIMER_2_DEV;
-            break;
-#endif
-
-        case TIMER_UNDEFINED:
-        default:
-            return -1;
-    }
-
-    /* set timeout value */
-    switch (channel) {
-        case 0:
-            //            tim->TC_CHANNEL[0].TC_RA = tim->TC_CHANNEL[0].TC_CV + timeout;
-            //            tim->TC_CHANNEL[0].TC_IER = TC_IER_CPAS;
-            break;
-
-        case 1:
-            //            tim->TC_CHANNEL[0].TC_RB = tim->TC_CHANNEL[0].TC_CV + timeout;
-            //            tim->TC_CHANNEL[0].TC_IER = TC_IER_CPBS;
-            break;
-
-        case 2:
-            //            tim->TC_CHANNEL[0].TC_RC = tim->TC_CHANNEL[0].TC_CV + timeout;
-            //            tim->TC_CHANNEL[0].TC_IER = TC_IER_CPCS;
-            break;
-
-        case 3:
-            //            tim->TC_CHANNEL[1].TC_RA = tim->TC_CHANNEL[1].TC_CV + timeout;
-            //            tim->TC_CHANNEL[1].TC_IER = TC_IER_CPAS;
-            break;
-
-        case 4:
-            //            tim->TC_CHANNEL[1].TC_RB = tim->TC_CHANNEL[1].TC_CV + timeout;
-            //            tim->TC_CHANNEL[1].TC_IER = TC_IER_CPBS;
-            break;
-
-        case 5:
-            //            tim->TC_CHANNEL[1].TC_RC = tim->TC_CHANNEL[1].TC_CV + timeout;
-            //            tim->TC_CHANNEL[1].TC_IER = TC_IER_CPCS;
-            break;
-
-        default:
-            return -1;
-    }
-
-    return 1;
+int timer_set_absolute(tim_t dev, int channel, unsigned int timeout)
+{
+    return __set_timer(dev, channel, timeout);
 }
 
 int timer_clear(tim_t dev, int channel)
 {
-    //    Tc *tim;
-
     /* get timer base register address */
     switch (dev) {
 #if TIMER_0_EN
 
         case TIMER_0:
-            //            tim = TIMER_0_DEV;
+            switch (channel) {
+                case 0:
+                    TIFR1 &= ~(1 << OCF1A);
+                    break;
+
+                case 1:
+                    TIFR1 &= ~(1 << OCF1B);
+                    break;
+
+                case 2:
+                    TIFR1 &= ~(1 << OCF1C);
+                    break;
+
+                default:
+                    return -1;
+            }
+
             break;
 #endif
 #if TIMER_1_EN
 
         case TIMER_1:
-            //            tim = TIMER_1_DEV;
+            switch (channel) {
+                case 0:
+                    IFR3 &= ~(1 << OCF3A);
+                    break;
+
+                case 1:
+                    IFR3 &= ~(1 << OCF3B);
+                    break;
+
+                case 2:
+                    IFR3 &= ~(1 << OCF3C);
+                    break;
+
+                default:
+                    return -1;
+                    break;
+            }
+
             break;
 #endif
 #if TIMER_2_EN
-            //        case TIMER_2:
-            //            tim = TIMER_2_DEV;
+
+        case TIMER_2:
+            switch (channel) {
+                case 0:
+                    IFR4 &= ~(1 << OCF4A);
+                    break;
+
+                case 1:
+                    IFR4 &= ~(1 << OCF4B);
+                    break;
+
+                case 2:
+                    IFR4 &= ~(1 << OCF4C);
+                    break;
+
+                default:
+                    return -1;
+                    break;
+            }
+
             break;
 #endif
 
         case TIMER_UNDEFINED:
-        default:
-            return -1;
-    }
-
-    /* disable the channels interrupt */
-    switch (channel) {
-        case 0:
-            //            tim->TC_CHANNEL[0].TC_IDR = TC_IDR_CPAS;
-            break;
-
-        case 1:
-            //            tim->TC_CHANNEL[0].TC_IDR = TC_IDR_CPBS;
-            break;
-
-        case 2:
-            //            tim->TC_CHANNEL[0].TC_IDR = TC_IDR_CPCS;
-            break;
-
-        case 3:
-            //            tim->TC_CHANNEL[1].TC_IDR = TC_IDR_CPAS;
-            break;
-
-        case 4:
-            //            tim->TC_CHANNEL[1].TC_IDR = TC_IDR_CPBS;
-            break;
-
-        case 5:
-            //            tim->TC_CHANNEL[1].TC_IDR = TC_IDR_CPCS;
-            break;
-
         default:
             return -1;
     }
@@ -245,36 +210,46 @@ int timer_clear(tim_t dev, int channel)
     return 1;
 }
 
-/*
- * The timer channels 1 and 2 are configured to run with the same speed and
- * have the same value (they run in parallel), so only on of them is returned.
- */
 unsigned int timer_read(tim_t dev)
-//TODO: needs to be implemented
 {
+    uint16_t value;
+
+    /*
+     * Disabling interrupts globally because read from 16 Bit register can
+     * otherwise be messed up
+     */
+    disableIRQ();
+
     switch (dev) {
 #if TIMER_0_EN
 
         case TIMER_0:
-            //            return TIMER_0_DEV->TC_CHANNEL[0].TC_CV;
+            value = TCNT1;
+            break;
 #endif
 #if TIMER_1_EN
+
         case TIMER_1:
-            //            return TIMER_1_DEV->TC_CHANNEL[0].TC_CV;
+            value = TCNT3;
+            break;
 #endif
 #if TIMER_2_EN
+
         case TIMER_2:
-            //            return TIMER_2_DEV->TC_CHANNEL[0].TC_CV;
+            value = TCNT4;
+            break;
 #endif
+
         case TIMER_UNDEFINED:
         default:
+            enableIRQ();
             return 0;
     }
+
+    enableIRQ();
+    return value;
 }
 
-/*
- * For stopping the counting of channels 1 + 2, channel 0 is disabled.
- */
 void timer_stop(tim_t dev)
 {
     switch (dev) {
@@ -335,19 +310,19 @@ void timer_irq_enable(tim_t dev)
 #if TIMER_0_EN
 
         case TIMER_0:
-            TIMSK1 |= (1 << OCIE1A);
+            TIMSK1 |= (1 << OCIE1A) | (1 << OCIE1B) | (1 << OCIE1C);
             break;
 #endif
 #if TIMER_1_EN
 
         case TIMER_1:
-            TIMSK3 |= (1 << OCIE3A);
+            TIMSK3 |= (1 << OCIE3A) | (1 << OCIE3B) | (1 << OCIE3C);
             break;
 #endif
 #if TIMER_2_EN
 
         case TIMER_2:
-            TIMSK4 |= (1 << OCIE4A);
+            TIMSK4 |= (1 << OCIE4A) | (1 << OCIE3B) | (1 << OCIE3C);
             break;
 #endif
 
@@ -355,7 +330,7 @@ void timer_irq_enable(tim_t dev)
             break;
     }
 
-    sei();
+    enableIRQ();
 }
 
 void timer_irq_disable(tim_t dev)
@@ -412,48 +387,137 @@ void timer_reset(tim_t dev)
     }
 }
 
+inline int __set_timer(tim_t dev, int channel, unsigned int timeout)
+{
+    /*
+     * Disabling interrupts globally because write to 16 Bit register can
+     * otherwise be messed up
+     */
+    disableIRQ();
+
+    switch (dev) {
 
 #if TIMER_0_EN
-/* TODO: implement channel logic */
-// LIKELY different ISRs for channels (compa, compb, compc)
+
+        case TIMER_0:
+            switch (channel) {
+                case 0:
+                    OCR1A = (uint16_t) timeout;
+                    break;
+
+                case 1:
+                    OCR1B = (uint16_t) timeout;
+                    break;
+
+                case 2:
+                    OCR1C = (uint16_t) timeout;
+                    break;
+
+                default:
+                    enableIRQ();
+                    return -1;
+            }
+
+            break;
+#endif
+#if TIMER_1_EN
+
+        case TIMER_1:
+            switch (channel) {
+                case 0:
+                    OCR3A = (uint16_t) timeout;
+                    break;
+
+                case 1:
+                    OCR3B = (uint16_t) timeout;
+                    break;
+
+                case 2:
+                    OCR3C = (uint16_t) timeout;
+                    break;
+
+                default:
+                    enableIRQ();
+                    return -1;
+            }
+
+            break;
+#endif
+#if TIMER_2_EN
+
+        case TIMER_2:
+            switch (channel) {
+                case 0:
+                    OCR4A = (uint16_t) timeout;
+                    break;
+
+                case 1:
+                    OCR4B = (uint16_t) timeout;
+                    break;
+
+                case 2:
+                    OCR4C = (uint16_t) timeout;
+                    break;
+
+                default:
+                    enableIRQ();
+                    return -1;
+            }
+
+            break;
+#endif
+
+        case TIMER_UNDEFINED:
+        default:
+            enableIRQ();
+            return -1;
+    }
+
+    enableIRQ();
+    return 1;
+}
+#if TIMER_0_EN
 ISR(TIMER1_COMPA_vect, ISR_BLOCK)
 {
-    TCNT1 = 0; // reset timer
-    // clear interrupt status register / interrupt flag
-    PORTB ^= (1 << 7);
-    //if  (interrupt & COMPA)
-    // config[timer0].cb(0)
-    //if i(interrupt &COMPB)
-    //
-    // config[timer0].cb(1)
-    //
-    //if (interrupt & COMPC)
-//    config[TIMER_0].cb(0);
+    PORTB ^= (1 << 7); // for debugging: shows that the ISR is used
+    //config[TIMER_0].cb(0);
 }
 ISR(TIMER1_COMPB_vect, ISR_BLOCK)
 {
-    ;
+    //config[TIMER_0].cb(1);
 }
 ISR(TIMER1_COMPC_vect, ISR_BLOCK)
 {
-    ;
+    //config[TIMER_0].cb(2);
 }
 #endif /* TIMER_0_EN */
 
 #if TIMER_1_EN
-/* TODO: implement channel logic */
 ISR(TIMER3_COMPA_vect, ISR_BLOCK)
 {
-    TCNT3 = 0;
-    config[TIMER_1].cb(0);
+    //config[TIMER_1].cb(0);
+}
+ISR(TIMER3_COMPB_vect, ISR_BLOCK)
+{
+    //config[TIMER_1].cb(1);
+}
+ISR(TIMER3_COMPC_vect, ISR_BLOCK)
+{
+    //config[TIMER_1].cb(2);
 }
 #endif /* TIMER_1_EN */
 
 #if TIMER_2_EN
-/* TODO: implement channel logic */
 ISR(TIMER4_COMPA_vect, ISR_BLOCK)
 {
-    TCNT4 = 0;
-    config[TIMER_2].cb(0);
+    //config[TIMER_2].cb(0);
+}
+ISR(TIMER5_COMPB_vect, ISR_BLOCK)
+{
+    //config[TIMER_2].cb(1);
+}
+ISR(TIMER6_COMPC_vect, ISR_BLOCK)
+{
+    //config[TIMER_2].cb(2);
 }
 #endif /* TIMER_2_EN */
